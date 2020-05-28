@@ -11,29 +11,32 @@ Dialog.openPanel({ arg path;
 
 //PLAY FILE (+ start EQ)
 (
-(
-var freqls=20000.0, freqhs = 20.0, freqp = 2000.0;
 // read a whole sound into memory
 x = Buffer.read(s, p); // remember to free the buffer later.
 
-SynthDef(\help_PlayBuf, {| out = 0, bufnum = 0 |
-	out = Mix(
-		BPeakEQ.ar(PlayBuf.ar(2,0.1), freqp, rq: 10.0, db:0.0, mul: 1.0, add: 0.0);
-		BLowShelf.ar(PlayBuf.ar(2,0.1), freqls, rs: 1.0, db:-50.0, mul: 1.0, add: 0.0);
-		BHiShelf.ar(PlayBuf.ar(2,0.1), freqhs, rs: 1.0, db:0.0, mul: 1.0, add: 0.0);
-
-	)
-
-    Out.ar(0, Pan2.ar(out,0));
-
-    )
-}).play(s, [\out, 0, \bufnum, b]);
+SynthDef(\equalizer, {| out = 0, bufnum = 0 |
+	arg freqls = 20.0, dbls = 0.0, rsls = 1.0;
+	arg freqp = 2000.0, dbp = 0.0, rqp = 1.0;
+	arg freqhs = 20000.0, dbhs = 0.0, rshs = 1.0;
+	var chain;
+	chain = BLowShelf.ar(PlayBuf.ar(2, 0.1), freqls, rsls, dbls, mul: 1.0, add: 0.0);
+	chain = BPeakEQ.ar(chain, freqp, rqp, dbp, mul: 1.0, add: 0.0);
+	chain = BHiShelf.ar(chain, freqhs, rshs, dbhs, mul: 1.0, add: 0.0);
+	Out.ar(0, Pan2.ar(chain, 0.0, 1.0));
+}).add;
 )
 
+a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs]);
+
+a.set(\equalizer, [\freqls, 5000, \dbls, -50]);
+
+
+//play(s, [\out, 0, \bufnum, b])
 
 
 
-x.set(\freqls, 5.0);
+Buffer
+chain.set(\freqls, 5.0);
 
 (
 /*OSCdef('OSCmotion',
