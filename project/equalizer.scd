@@ -9,10 +9,9 @@ Dialog.openPanel({ arg path;
 });
 )
 
-//PLAY FILE (+ start EQ)
+// EQUALIZER
 (
-// read a whole sound into memory
-x = Buffer.read(s, p); // remember to free the buffer later.
+x = Buffer.read(s, p); // read a whole sound into memory
 
 SynthDef(\equalizer, {
 	arg freqls = 20.0, dbls = 0.0, rsls = 1.0, freqp = 2000.0, dbp = 0.0, rqp = 1.0, freqhs = 20000.0, dbhs = 0.0, rshs = 1.0;
@@ -24,15 +23,10 @@ SynthDef(\equalizer, {
 }).add;
 )
 
-//a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs])
-
-//a.set(\freqls, 1000, \dbls, -50)
-
-
-//play(s, [\out, 0, \bufnum, b])
-
 NetAddr("192.168.1.8", 57120);
 
+
+//OSC messages                            !!!TODO: trovare il modo di interpretare i messaggi in SC!!!
 (
 /*OSCdef('OSCmotion',
 	{
@@ -49,12 +43,14 @@ NetAddr("192.168.1.8", 57120);
 	},
 	"/syntien/filthyanimal/1/scope1");
 */
-a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs])
+
+a = Synth(\equalizer);
+
 OSCdef('OSCpotBass',
 	{
 		arg msg;
 
-		var rsls = round(msg[1]);
+		var rsls = round(((msg[1] + 1.5) / (3)) * 100);
 
 		postf("rsls: % \n", rsls);
 		a.set(\rsls, rsls);
@@ -66,26 +62,26 @@ OSCdef('OSChsliderBass',
 	{
 		arg msg;
 
-		var freqls = msg[1];
+		var freqls = round(((msg[1] + 1.5) / (3)) * 100);
 
 		postf("freqls: %", freqls);
-		x.set(\freqls, freqls);
+		a.set(\freqls, freqls);
 
 	},
-	"/syntien/filthyanimal/1/slider1");
-
+	"/syntien/filthyanimal/1/slider3");
 
 OSCdef('OSCvsliderBass',
 	{
 		arg msg;
 
-		var dbls = msg[1];
+		var dbls = round(((msg[1] + 1.5) / (3)) * 100);
 
 		postf("dbls: %", dbls);
-		x.set(\dbls, dbls);
+		a.set(\dbls, dbls);
 
 	},
-	"/syntien/filthyanimal/1/slider2");
+	"/syntien/filthyanimal/1/multislider1");
+
 )
 
-b.release;
+b.free;
