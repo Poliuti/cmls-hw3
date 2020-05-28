@@ -14,10 +14,8 @@ Dialog.openPanel({ arg path;
 // read a whole sound into memory
 x = Buffer.read(s, p); // remember to free the buffer later.
 
-SynthDef(\equalizer, {| out = 0, bufnum = 0 |
-	arg freqls = 20.0, dbls = 0.0, rsls = 1.0;
-	arg freqp = 2000.0, dbp = 0.0, rqp = 1.0;
-	arg freqhs = 20000.0, dbhs = 0.0, rshs = 1.0;
+SynthDef(\equalizer, {
+	arg freqls = 20.0, dbls = 0.0, rsls = 1.0, freqp = 2000.0, dbp = 0.0, rqp = 1.0, freqhs = 20000.0, dbhs = 0.0, rshs = 1.0;
 	var chain;
 	chain = BLowShelf.ar(PlayBuf.ar(2, 0.1), freqls, rsls, dbls, mul: 1.0, add: 0.0);
 	chain = BPeakEQ.ar(chain, freqp, rqp, dbp, mul: 1.0, add: 0.0);
@@ -26,17 +24,14 @@ SynthDef(\equalizer, {| out = 0, bufnum = 0 |
 }).add;
 )
 
-a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs]);
+//a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs])
 
-a.set(\equalizer, [\freqls, 5000, \dbls, -50]);
+//a.set(\freqls, 1000, \dbls, -50)
 
 
 //play(s, [\out, 0, \bufnum, b])
 
-
-
-Buffer
-chain.set(\freqls, 5.0);
+NetAddr("192.168.1.8", 57120);
 
 (
 /*OSCdef('OSCmotion',
@@ -54,14 +49,15 @@ chain.set(\freqls, 5.0);
 	},
 	"/syntien/filthyanimal/1/scope1");
 */
+a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs])
 OSCdef('OSCpotBass',
 	{
 		arg msg;
 
-		var q = round(msg[1]);
+		var rsls = round(msg[1]);
 
-		postf("q: % \n", q);
-		x.set(\q, q);
+		postf("rsls: % \n", rsls);
+		a.set(\rsls, rsls);
 
 	},
 	"/syntien/filthyanimal/1/knob3");
@@ -70,23 +66,23 @@ OSCdef('OSChsliderBass',
 	{
 		arg msg;
 
-		var fre = msg[1];
+		var freqls = msg[1];
 
-		postf("fre: %", fre);
-		x.set(\fre, fre);
+		postf("freqls: %", freqls);
+		x.set(\freqls, freqls);
 
 	},
 	"/syntien/filthyanimal/1/slider1");
-)
+
 
 OSCdef('OSCvsliderBass',
 	{
 		arg msg;
 
-		var amp = msg[1];
+		var dbls = msg[1];
 
-		postf("amp: %", amp);
-		x.set(\amp, amp);
+		postf("dbls: %", dbls);
+		x.set(\dbls, dbls);
 
 	},
 	"/syntien/filthyanimal/1/slider2");
