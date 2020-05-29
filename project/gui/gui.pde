@@ -16,16 +16,17 @@ void setup() {
   
   cp5 = new ControlP5(this);
   
+  float marginTop = 40;
   float marginLeft = 10;
   float marginRight = 10;
-  float marginBetween = 1;
+  float marginBetween = 2;
   
   for (int i = 0; i < NBANDS; i++) {
     float w = (width - marginLeft - marginRight) / NBANDS - marginBetween;
     cp5.addSlider("/"+i+"/gain")
       .setRange(-12, 12)
       .setSize((int)w, height/2)
-      .setPosition(marginLeft + (w + marginBetween) * i + marginBetween/2, 20)
+      .setPosition(marginLeft + (w + marginBetween) * i + marginBetween/2, marginTop)
       .setCaptionLabel("");
   }
   
