@@ -10,8 +10,12 @@ NetAddress remote;
 
 int NBANDS = 60;
 
+EQSlider s;
+
 void setup() {
 
+   s = new EQSlider(-12, 12, 10);
+  
   Locale.setDefault(new Locale("en", "US")); // for string formatting
 
   size(800,400);
@@ -29,7 +33,7 @@ void setup() {
   float marginRight = 10;
   float marginBetween = 0;
   
-  for (int i = 0; i < NBANDS; i++) {
+  /*for (int i = 0; i < NBANDS; i++) {
     float w = (width - marginLeft - marginRight) / NBANDS - marginBetween;
     cp5.addSlider("/"+i+"/gain")
       .setRange(-12, 12)
@@ -80,12 +84,12 @@ void setup() {
   cp5.addTextlabel("gainVal")
     .setText("0.0 dB")
     .setFont(createFont("arial",20))
-    .setPosition(width - 100, height - 30);
+    .setPosition(width - 100, height - 30);*/
 
   textFont(font);
 }
 
 void draw() {
   background(20,50,100);
-
+  s.draw();
 }
