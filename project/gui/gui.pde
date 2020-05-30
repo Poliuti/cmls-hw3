@@ -12,6 +12,9 @@ void setup() {
   size(800,400);
   noStroke();
   
+  remote = new NetAddress("localhost", 0);
+  oscServer = new OscP5(this, 12000);
+  
   PFont font = createFont("arial", 20);
   
   cp5 = new ControlP5(this);
@@ -27,30 +30,46 @@ void setup() {
       .setRange(-12, 12)
       .setSize((int)w, height/2)
       .setPosition(marginLeft + (w + marginBetween) * i + marginBetween/2, marginTop)
-      .setCaptionLabel("");
+      .setCaptionLabel("")
+      .onChange(new CallbackListener() {
+        public void controlEvent(CallbackEvent theEvent) {
+          Slider s = (Slider) theEvent.getController();
+          OscMessage msg = new OscMessage("/eq" + s.getName(), new Object[]{ s.getValue() });
+          oscServer.send(msg, remote);
+          println(s.getValue());
+        }
+      });
   }
   
   cp5.addTextfield("ip")
-    .setCaptionLabel("SuperCollider Server (ip/port)")
+    .setCaptionLabel("SuperCollider ip")
     .setPosition(5, 5)
     .setSize(80, 20)
-    .setFocus(true);
+    .setFocus(true)
+    .setAutoClear(false)
+    .onChange(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        remote = new NetAddress(((Textfield)theEvent.getController()).getText(), remote.port());
+        println(remote);
+      }
+    });
 
   cp5.addTextfield("port")
-    .setCaptionLabel("")
+    .setCaptionLabel("port")
     .setPosition(90, 5)
     .setSize(20, 20)
-    .setFocus(true);
-     
+    .setAutoClear(false)
+    .onChange(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        remote = new NetAddress(remote.address(), Integer.parseInt(((Textfield)theEvent.getController()).getText()));
+        println(remote);
+      }
+    });
+
   textFont(font);
 }
 
 void draw() {
   background(20,50,100);
 
-}
-
-public void input(String theText) {
-  // automatically receives results from controller input
-  println("a textfield event for controller 'input' : "+theText);
 }
