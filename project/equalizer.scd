@@ -15,23 +15,19 @@ Dialog.openPanel({ arg path;
 x = Buffer.read(s, p); // remember to free the buffer later.
 
 SynthDef(\equalizer, {
-	arg freqls = 20.0, dbls = 0.0, rsls = 1.0, freqp = 2000.0, dbp = 0.0, rqp = 1.0, freqhs = 20000.0, dbhs = 0.0, rshs = 1.0;
-	var chain;
-	chain = BLowShelf.ar(PlayBuf.ar(2, 0.1), freqls, rsls, dbls, mul: 1.0, add: 0.0);
-	chain = BPeakEQ.ar(chain, freqp, rqp, dbp, mul: 1.0, add: 0.0);
-	chain = BHiShelf.ar(chain, freqhs, rshs, dbhs, mul: 1.0, add: 0.0);
-	Out.ar(0, Pan2.ar(chain, 0.0, 1.0));
+	arg freqInit = 25, freq, gain;
+	var out, outEq;
+
+	outEq = Mix.fill(n, { |i|
+		BBandPass.ar(PlayBuf.ar(2, 0.1), freqInit*pow(2,i*4/12), bw: 1.0, mul: 1.0, add: 0.0)
+	});
+	out = PlayBuf.ar(2, 0.1) + outEq;
+	Out.ar(0, Pan2.ar(out, 0.0, 1.0));
 }).add;
 )
-
-//a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs])
-
-//a.set(\freqls, 1000, \dbls, -50)
-
-
 //play(s, [\out, 0, \bufnum, b])
 
-NetAddr("192.168.1.8", 57120);
+NetAddr("192.168.1.107", 57120);
 
 (
 /*OSCdef('OSCmotion',
@@ -49,7 +45,9 @@ NetAddr("192.168.1.8", 57120);
 	},
 	"/syntien/filthyanimal/1/scope1");
 */
-a = Synth(\equalizer, [\freqls, \dbls, \rsls, \freqp, \dbp, \rqp, \freqhs, \dbhs, \rshs])
+a = Synth(\equalizer);
+
+
 OSCdef('OSCpotBass',
 	{
 		arg msg;
@@ -60,7 +58,7 @@ OSCdef('OSCpotBass',
 		a.set(\rsls, rsls);
 
 	},
-	"/syntien/filthyanimal/1/knob3");
+	"/oscControl/");
 
 OSCdef('OSChsliderBass',
 	{
@@ -68,11 +66,11 @@ OSCdef('OSChsliderBass',
 
 		var freqls = msg[1];
 
-		postf("freqls: %", freqls);
-		x.set(\freqls, freqls);
+		postf("freqls: % \n", freqls);
+		a.set(\freqls, freqls);
 
 	},
-	"/syntien/filthyanimal/1/slider1");
+	"/oscControl/freqls");
 
 
 OSCdef('OSCvsliderBass',
@@ -81,11 +79,11 @@ OSCdef('OSCvsliderBass',
 
 		var dbls = msg[1];
 
-		postf("dbls: %", dbls);
-		x.set(\dbls, dbls);
+		postf("dbls: % \n", dbls);
+		a.set(\dbls, dbls);
 
 	},
-	"/syntien/filthyanimal/1/slider2");
+	"/oscControl/dbls");
 )
 
 b.release;
