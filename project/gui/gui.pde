@@ -15,11 +15,11 @@ void setup() {
   PFont font = createFont("arial", 20);
   
   cp5 = new ControlP5(this);
-  
+
   float marginTop = 40;
   float marginLeft = 10;
   float marginRight = 10;
-  float marginBetween = 2;
+  float marginBetween = 1;
   
   for (int i = 0; i < NBANDS; i++) {
     float w = (width - marginLeft - marginRight) / NBANDS - marginBetween;
@@ -30,7 +30,14 @@ void setup() {
       .setCaptionLabel("");
   }
   
-  cp5.addTextfield("SuperCollider Server")
+  cp5.addTextfield("ip")
+    .setPosition(5, 5)
+    .setSize(80, 20)
+    .setFocus(true);
+
+  cp5.addTextfield("port")
+    .setPosition(90, 5)
+    .setSize(20, 20)
     .setFocus(true);
      
   textFont(font);
