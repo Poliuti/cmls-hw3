@@ -12,7 +12,7 @@ void setup() {
   size(800,400);
   noStroke();
   
-  remote = new NetAddress("localhost", 0);
+  remote = new NetAddress("localhost", 57120); // initial value, can be overridden
   oscServer = new OscP5(this, 12000);
   
   PFont font = createFont("arial", 20);
@@ -32,7 +32,8 @@ void setup() {
       .setPosition(marginLeft + (w + marginBetween) * i + marginBetween/2, marginTop)
       .setCaptionLabel("")
       .setLabelVisible(false)
-      .setSliderMode(1)
+      .setSliderMode(Slider.FLEXIBLE)
+      .setMoveable(false)
       .onChange(new CallbackListener() {
         public void controlEvent(CallbackEvent theEvent) {
           Slider s = (Slider) theEvent.getController();
@@ -45,6 +46,7 @@ void setup() {
   
   cp5.addTextfield("ip")
     .setCaptionLabel("SuperCollider ip")
+    .setValue(remote.address())
     .setPosition(5, 5)
     .setSize(80, 20)
     .setFocus(true)
@@ -58,6 +60,7 @@ void setup() {
 
   cp5.addTextfield("port")
     .setCaptionLabel("port")
+    .setValue(Integer.toString(remote.port()))
     .setPosition(90, 5)
     .setSize(30, 20)
     .setAutoClear(false)
