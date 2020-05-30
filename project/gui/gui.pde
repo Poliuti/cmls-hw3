@@ -22,7 +22,7 @@ void setup() {
   float marginTop = 40;
   float marginLeft = 10;
   float marginRight = 10;
-  float marginBetween = 1;
+  float marginBetween = 0;
   
   for (int i = 0; i < NBANDS; i++) {
     float w = (width - marginLeft - marginRight) / NBANDS - marginBetween;
@@ -31,6 +31,8 @@ void setup() {
       .setSize((int)w, height/2)
       .setPosition(marginLeft + (w + marginBetween) * i + marginBetween/2, marginTop)
       .setCaptionLabel("")
+      .setLabelVisible(false)
+      .setSliderMode(1)
       .onChange(new CallbackListener() {
         public void controlEvent(CallbackEvent theEvent) {
           Slider s = (Slider) theEvent.getController();
@@ -57,7 +59,7 @@ void setup() {
   cp5.addTextfield("port")
     .setCaptionLabel("port")
     .setPosition(90, 5)
-    .setSize(20, 20)
+    .setSize(30, 20)
     .setAutoClear(false)
     .onChange(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
