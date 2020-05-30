@@ -15,17 +15,24 @@ Dialog.openPanel({ arg path;
 x = Buffer.read(s, p); // remember to free the buffer later.
 
 SynthDef(\equalizer, {
-	arg freqInit = 25, freq, gain;
-	var out, outEq;
+	arg freqInit = 25, freq;
+	var out, outEq, n = 30;
+	var gain= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0000001];
+	var r = pow(2,4/12);
+	//var bwcoeff = pow(r,0.5) - 1/pow(r,0.5)//=0.23;
 
 	outEq = Mix.fill(n, { |i|
-		BBandPass.ar(PlayBuf.ar(2, 0.1), freqInit*pow(2,i*4/12), bw: 1.0, mul: 1.0, add: 0.0)
+		//gain[i] * BBandPass.ar(WhiteNoise.ar(2, 0.1), freqInit*pow(r,i), 5, mul: 1.0, add: 0.0)
+			//gain[i] * BBandPass.ar(WhiteNoise.ar(1.0, 0.0), freqInit*pow(r,i), (sqrt(r) - 1/sqrt(r))*freqInit*pow(r,i), mul: 1.0, add: 0.0)
+		gain[i] * BPF.ar(WhiteNoise.ar(2, 0.1), freqInit*pow(r,i), 0.23, mul: 1.0, add: 0.0)
 	});
-	out = PlayBuf.ar(2, 0.1) + outEq;
-	Out.ar(0, Pan2.ar(out, 0.0, 1.0));
+	//(pow(r,0.5) - 1/pow(r,0.5))*freqInit*pow(r,i)
+
+	Out.ar(0, Pan2.ar(outEq, 0.0, 1.0));
 }).add;
 )
 //play(s, [\out, 0, \bufnum, b])
+
 
 NetAddr("192.168.1.107", 57120);
 
@@ -52,13 +59,13 @@ OSCdef('OSCpotBass',
 	{
 		arg msg;
 
-		var rsls = round(msg[1]);
+		var gain = (msg[1]);
 
-		postf("rsls: % \n", rsls);
-		a.set(\rsls, rsls);
+		postf("gain: % \n", gain);
+		a.set(\gain, gain);
 
 	},
-	"/oscControl/");
+	"/oscControl/gain");
 
 OSCdef('OSChsliderBass',
 	{
