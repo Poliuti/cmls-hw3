@@ -2,6 +2,8 @@ import oscP5.*;
 import netP5.*;
 import controlP5.*;
 
+import java.util.Locale;
+
 ControlP5 cp5;
 OscP5 oscServer;
 NetAddress remote;
@@ -9,6 +11,9 @@ NetAddress remote;
 int NBANDS = 60;
 
 void setup() {
+
+  Locale.setDefault(new Locale("en", "US")); // for string formatting
+
   size(800,400);
   noStroke();
   
@@ -39,6 +44,7 @@ void setup() {
           Slider s = (Slider) theEvent.getController();
           OscMessage msg = new OscMessage("/eq" + s.getName(), new Object[]{ s.getValue() });
           oscServer.send(msg, remote);
+          cp5.get(Textlabel.class, "gainVal").setText(String.format("%.2f dB", s.getValue()));
           println(s.getValue());
         }
       });
@@ -70,6 +76,11 @@ void setup() {
         println(remote);
       }
     });
+
+  cp5.addTextlabel("gainVal")
+    .setText("0.0 dB")
+    .setFont(createFont("arial",20))
+    .setPosition(width - 100, height - 30);
 
   textFont(font);
 }
