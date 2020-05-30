@@ -31,11 +31,13 @@ void setup() {
   }
   
   cp5.addTextfield("ip")
+    .setCaptionLabel("SuperCollider Server (ip/port)")
     .setPosition(5, 5)
     .setSize(80, 20)
     .setFocus(true);
 
   cp5.addTextfield("port")
+    .setCaptionLabel("")
     .setPosition(90, 5)
     .setSize(20, 20)
     .setFocus(true);
