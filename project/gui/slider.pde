@@ -1,21 +1,29 @@
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// A SLIDER WITH METER FEEDBACK
+
 class EQSlider extends UIElement {
   float min_v, max_v; // min and max values
   float v, drawn_v; // current value and displayed/drawn value
   float inertia; // speed factor for elasticity
   float meter; // value of meter TODO
   
+  Callback onChange;
+
   int thumbh = 10; // height of the thumb of the slider
   
   EQSlider(float miv, float mav, float ine) {
     min_v = miv;
     max_v = mav;
     inertia = ine;
+    onChange = null;
   }
 
   void update() {
     if (isOver() && mousePressed) {
+      float old_v = v;
       v = position2value(mouseY);
-      println(v);
+      if (onChange != null && v != old_v)
+        onChange.action(this);
     }
     drawn_v += (v - drawn_v) / inertia;
   }

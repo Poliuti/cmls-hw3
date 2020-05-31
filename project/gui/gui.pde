@@ -31,7 +31,16 @@ void setup() {
 
   for (int i = 0; i < NBANDS; i++) {
     EQSlider s = new EQSlider(-12, 12, 5);
-    // TODO: listener onchange of s
+    s.onChange = new Callback() {
+      public void action(UIElement el) {
+        EQSlider sl = (EQSlider) el;
+        int j = mixer.elements.indexOf(sl);
+        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.v });
+        oscServer.send(msg, remote);
+        gain.setText(String.format("%.2f dB", sl.v));
+        println(sl.v);
+      }
+    };
     mixer.elements.add(s);
   }
   

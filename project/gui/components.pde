@@ -1,3 +1,10 @@
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// BASE CLASSES
+
+interface Callback {
+  void action(UIElement caller);
+}
+
 abstract class UIElement {
   float w, h; // width and height
   float x, y; // position
@@ -17,6 +24,8 @@ abstract class UIElement {
   }
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// FLEXBOX
 
 static enum Direction { HORIZONTAL, VERTICAL }
 
