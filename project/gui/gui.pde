@@ -8,13 +8,11 @@ int NBANDS = 60;
 OscP5 oscServer;
 NetAddress remote;
 
-Mixer mixer;
+UIFlexbox mixer;
 ControlP5 cp5;
 Textfield ip, port;
 Textlabel gain;
 DraggingEllipse cerchio;
-
-
 void setup() {
   
   Locale.setDefault(new Locale("en", "US")); // for string formatting
@@ -24,17 +22,15 @@ void setup() {
   
   remote = new NetAddress("localhost", 57120); // initial value, can be overridden
   oscServer = new OscP5(this, 12000);
-
-  cerchio= new DraggingEllipse(400,318);
-
+   DraggingEllipse b = new DraggingEllipse(-1,1, -1,1);
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Mixer Board
   
-  mixer = new Mixer(10, 2);
+  mixer = new UIFlexbox(10, 2, Direction.HORIZONTAL);
   mixer.setPosition(0, 40).setSize(width, height/2);
 
   for (int i = 0; i < NBANDS; i++) {
-    EQSlider s = new EQSlider(-12, 12, 3, 5);
+    EQSlider s = new EQSlider(-12, 12, 5);
     s.onChange = new Callback() {
       public void action(UIElement el) {
         EQSlider sl = (EQSlider) el;
@@ -42,7 +38,7 @@ void setup() {
         OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.v });
         oscServer.send(msg, remote);
         gain.setText(String.format("%.2f dB", sl.v));
-        println(j + ": " + sl.v);
+        println(sl.v);
       }
     };
     mixer.elements.add(s);
@@ -55,12 +51,11 @@ void setup() {
   
   cp5 = new ControlP5(this);
   PFont font = createFont("arial", 20);
-  textFont(font);
   
   ip = cp5.addTextfield("ip")
     .setCaptionLabel("SuperCollider ip")
     .setValue(remote.address())
-    .setPosition(10, 8)
+    .setPosition(5, 5)
     .setSize(80, 20)
     .setFocus(true)
     .setAutoClear(false);
@@ -68,37 +63,25 @@ void setup() {
   port = cp5.addTextfield("port")
     .setCaptionLabel("port")
     .setValue(Integer.toString(remote.port()))
-    .setPosition(95, 8)
+    .setPosition(90, 5)
     .setSize(30, 20)
     .setAutoClear(false);
 
   gain = cp5.addTextlabel("gainVal")
     .setText("0.0 dB")
-    .setFont(createFont("arial",25))
-    .setPosition(width - 120, height - 30);
+    .setFont(createFont("arial",20))
+    .setPosition(width - 100, height - 30);
 
+  textFont(font);
 }
 
 void draw() {
   background(20,50,100);
   mixer.draw();
-  stroke(10);
-  fill(205);
-  //rectMode(CENTER);
-  rect(325,243,150,150);
-  fill(204, 102, 0);
-  cerchio.draw();
+  b.draw();
 }
 
 void keyReleased() {
   remote = new NetAddress(ip.getText(), Integer.parseInt(port.getText()));
   println(remote);
-}
-
-void mouseClicked(MouseEvent evt) {
-  for (UIElement e : mixer.elements) {
-    EQSlider s = (EQSlider) e;
-    if (evt.getCount() == 2 && s.isOver())
-      s.setValue(0);
-  }
 }
