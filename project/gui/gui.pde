@@ -80,6 +80,7 @@ void draw() {
   mixer.draw();
 }
 
-void keypressed() {
+void keyReleased() {
   remote = new NetAddress(ip.getText(), Integer.parseInt(port.getText()));
+  println(remote);
 }
