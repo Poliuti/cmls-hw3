@@ -33,18 +33,18 @@ class EQSlider extends UIElement {
     }
     rect(x, ypos, w, thumbh);
   }
-
+  
   float position2value(float pos) {
     float start = y + thumbh / 2;
-    float end = h - thumbh / 2;
-    float ratio = (pos - start) / (end - start);
-    return (max_v - min_v) * ratio - min_v;
+    float end = (y + h) - thumbh / 2;
+    float ratio = constrain((end - pos) / (end - start), 0, 1);
+    return (max_v - min_v) * ratio + min_v;
   }
   
   float value2position(float val) {
-    float ratio = (val + min_v) / (max_v - min_v);
-    float start = y;
-    float end = h - thumbh;
+    float ratio = (val - min_v) / (max_v - min_v);
+    float start = (y + h) - thumbh;
+    float end = y;
     return ratio * (end - start) + start;
   }
 
