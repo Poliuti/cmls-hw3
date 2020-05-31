@@ -25,8 +25,9 @@ SynthDef(\equalizer, { |gains = #[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 	var bwcoeff = pow(r,0.5) - 1/pow(r,0.5);
 
 	outEq = Mix.fill(n, { |i|
-		//BPF.ar(PlayBuf.ar(2, 0.1), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0)
-		BPF.ar(WhiteNoise.ar(1, 0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0)});
+		BPF.ar(PlayBuf.ar(2, 0.1), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0)
+		//BPF.ar(WhiteNoise.ar(1, 0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0)
+	});
 
 
 	groupLow = Mix.fill(n, { |i|
