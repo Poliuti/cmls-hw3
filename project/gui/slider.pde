@@ -18,13 +18,17 @@ class EQSlider extends UIElement {
     onChange = null;
   }
 
+  void setValue(float vv) {
+    vv = constrain(vv, min_v, max_v);
+    float old_v = v;
+    v = vv;
+    if (onChange != null && v != old_v)
+      onChange.action(this);
+  }
+
   void update() {
-    if (isOver() && mousePressed) {
-      float old_v = v;
-      v = position2value(mouseY);
-      if (onChange != null && v != old_v)
-        onChange.action(this);
-    }
+    if (isOver() && mousePressed)
+       setValue(position2value(mouseY));
     drawn_v += (v - drawn_v) / inertia;
   }
   

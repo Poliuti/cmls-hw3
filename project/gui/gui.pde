@@ -38,7 +38,7 @@ void setup() {
         OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.v });
         oscServer.send(msg, remote);
         gain.setText(String.format("%.2f dB", sl.v));
-        println(sl.v);
+        println(j + ": " + sl.v);
       }
     };
     mixer.elements.add(s);
@@ -51,11 +51,12 @@ void setup() {
   
   cp5 = new ControlP5(this);
   PFont font = createFont("arial", 20);
+  textFont(font);
   
   ip = cp5.addTextfield("ip")
     .setCaptionLabel("SuperCollider ip")
     .setValue(remote.address())
-    .setPosition(5, 5)
+    .setPosition(10, 8)
     .setSize(80, 20)
     .setFocus(true)
     .setAutoClear(false);
@@ -63,16 +64,15 @@ void setup() {
   port = cp5.addTextfield("port")
     .setCaptionLabel("port")
     .setValue(Integer.toString(remote.port()))
-    .setPosition(90, 5)
+    .setPosition(95, 8)
     .setSize(30, 20)
     .setAutoClear(false);
 
   gain = cp5.addTextlabel("gainVal")
     .setText("0.0 dB")
-    .setFont(createFont("arial",20))
-    .setPosition(width - 100, height - 30);
+    .setFont(createFont("arial", 25))
+    .setPosition(width - 120, height - 30);
 
-  textFont(font);
 }
 
 void draw() {
@@ -83,4 +83,12 @@ void draw() {
 void keyReleased() {
   remote = new NetAddress(ip.getText(), Integer.parseInt(port.getText()));
   println(remote);
+}
+
+void mouseClicked(MouseEvent evt) {
+  for (UIElement e : mixer.elements) {
+    EQSlider s = (EQSlider) e;
+    if (evt.getCount() == 2 && s.isOver())
+      s.setValue(0);
+  }
 }
