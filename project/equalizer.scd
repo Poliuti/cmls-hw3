@@ -16,46 +16,54 @@ x = Buffer.read(s, p); // remember to free the buffer later.
 
 SynthDef(\equalizer, {
 	arg freqInit = 25, freq;
-	var out, outEq, n = 30;
-	var gain= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0000001];
+	var n = 30, out, outEq, groupLow, groupMid, groupHigh;
+	var gain= [0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0.000001];
+	var gainLow= [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	var gainMid= [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0];
+	var gainHigh= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1];
 	var r = pow(2,4/12);
-	//var bwcoeff = pow(r,0.5) - 1/pow(r,0.5)//=0.23;
-
+	var bwcoeff = pow(r,0.5) - 1/pow(r,0.5);
 	outEq = Mix.fill(n, { |i|
-		//gain[i] * BBandPass.ar(WhiteNoise.ar(2, 0.1), freqInit*pow(r,i), 5, mul: 1.0, add: 0.0)
-			//gain[i] * BBandPass.ar(WhiteNoise.ar(1.0, 0.0), freqInit*pow(r,i), (sqrt(r) - 1/sqrt(r))*freqInit*pow(r,i), mul: 1.0, add: 0.0)
-		gain[i] * BPF.ar(WhiteNoise.ar(2, 0.1), freqInit*pow(r,i), 0.23, mul: 1.0, add: 0.0)
+		//gain[i] * BPF.ar(PlayBuf.ar(2, 0.1), freqInit*pow(r,i), 0.23, mul: 1.0, add: 0.0)
+		BPF.ar(WhiteNoise.ar(1, 0), freqInit*pow(r,i), 0.23, mul: gain[i], add: 0.0)
 	});
-	//(pow(r,0.5) - 1/pow(r,0.5))*freqInit*pow(r,i)
 
-	Out.ar(0, Pan2.ar(outEq, 0.0, 1.0));
+
+	groupLow = Mix.fill(n, { |i|
+		gainLow[i] * BPF.ar(outEq, freqInit*pow(r,i), 0.23, mul: 1.0, add: 0.0)
+	});
+
+	groupMid = Mix.fill(n, { |i|
+		gainMid[i] * BPF.ar(outEq, freqInit*pow(r,i), 0.23, mul: 1.0, add: 0.0)
+	});
+
+	groupHigh = Mix.fill(n, { |i|
+		gainHigh[i] * BPF.ar(outEq, freqInit*pow(r,i), 0.23, mul: 1.0, add: 0.0)
+	});
+	/*
+	groupLow = BHiPass4(outEq, freq: 3000.0, rq: 0.23, mul: 1.0, add: 0.0);
+
+	groupMid = BBandPass(outEq, freq: 10000.0, bw: 1.0, mul: 1.0, add: 0.0);
+
+	groupHigh = BLowPass4(outEq, freq: 10000.0, rq: 1.0, mul: 1.0, add: 0.0);
+	*/
+	Out.ar(0, Pan4.ar(groupLow, MouseX.kr(-1,1), MouseY.kr(-1,1), Line.ar(mul: 0.5)));
+	Out.ar(0, Pan4.ar(groupMid, MouseX.kr(-1,1), MouseY.kr(-1,1), Line.ar(mul: 0.5)));
+	Out.ar(0, Pan4.ar(groupHigh, MouseX.kr(-1,1), MouseY.kr(-1,1), Line.ar(mul: 0.5)));
+
 }).add;
 )
-//play(s, [\out, 0, \bufnum, b])
 
+OSCFunc.trace(true);
+// ora basta
+OSCFunc.trace(false) ;
 
 NetAddr("192.168.1.107", 57120);
 
 (
-/*OSCdef('OSCmotion',
-	{
-		arg msg;
-		//var pan = -msg[3];
-		// all the messages should stay between + - pi ( in practice not really)
-		var note = round(((msg[1] + 1.5) / (3)) * 100);  //roll (rotation on x axis)
-
-		var detune = msg[3];     //yaw (rotation on z axis)
-
-		postf("detune: %, note: % \n", detune, note);
-		x.set(\note, note,\detune,detune);
-
-	},
-	"/syntien/filthyanimal/1/scope1");
-*/
 a = Synth(\equalizer);
 
-
-OSCdef('OSCpotBass',
+OSCdef('OSCgain'+/+ 1,
 	{
 		arg msg;
 
@@ -65,32 +73,6 @@ OSCdef('OSCpotBass',
 		a.set(\gain, gain);
 
 	},
-	"/oscControl/gain");
-
-OSCdef('OSChsliderBass',
-	{
-		arg msg;
-
-		var freqls = msg[1];
-
-		postf("freqls: % \n", freqls);
-		a.set(\freqls, freqls);
-
-	},
-	"/oscControl/freqls");
-
-
-OSCdef('OSCvsliderBass',
-	{
-		arg msg;
-
-		var dbls = msg[1];
-
-		postf("dbls: % \n", dbls);
-		a.set(\dbls, dbls);
-
-	},
-	"/oscControl/dbls");
-)
+		"/eq/" +/+ i +/+ "/gain");
 
 b.release;
