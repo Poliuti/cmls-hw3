@@ -8,15 +8,15 @@ interface Callback {
 abstract class UIElement {
   float w, h; // width and height
   float x, y; // position
-  
+
   abstract void draw();
-  
+
   UIElement setSize(float ww, float hh) {
     w = ww;
     h = hh;
     return this;
   }
-  
+
   UIElement setPosition(float xx, float yy) {
     x = xx;
     y = yy;
@@ -29,22 +29,37 @@ abstract class UIElement {
   }
 }
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// GROUP
+
+class UIGroup extends UIElement {
+  ArrayList<UIElement> elements;
+
+  UIGroup() {
+    elements = new ArrayList();
+  }
+
+  void draw() {
+    for (UIElement e : elements)
+      e.draw();
+  }
+}
+
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // FLEXBOX
 
 static enum Direction { HORIZONTAL, VERTICAL }
 
-class UIFlexbox extends UIElement {
+class UIFlexbox extends UIGroup {
   float margin, spacing; // surrounding margin and space between elements
   Direction dir;
   
-  ArrayList<UIElement> elements;
-  
   UIFlexbox(float m, float s, Direction d) {
+    super();
     margin = m;
     spacing = s;
     dir = d;
-    elements = new ArrayList();
   }
   
   void layout() {
@@ -75,9 +90,5 @@ class UIFlexbox extends UIElement {
         curY += elemH + spacing;
     }
   }
-  
-  void draw() {
-    for (UIElement e : elements)
-      e.draw();
-  }
+
 }
