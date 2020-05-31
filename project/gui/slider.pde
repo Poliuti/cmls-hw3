@@ -1,3 +1,32 @@
+// ~~~~~~~~~~~
+// MIXER
+class Mixer extends UIFlexbox {
+
+  Mixer(float m, float s) {
+    super(m, 0, Direction.HORIZONTAL);
+  }
+
+  void draw() {
+    makeVerticalGradient(x + margin, y + margin, w - 2*margin - 1, h - 2*margin, color(255, 0, 0), color(0, 200, 0));
+    super.draw();
+  }
+
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// GRADIENT
+
+void makeVerticalGradient(float x, float y, float w, float h, color c1, color c2) {
+  noFill();
+
+  for (float i = y; i <= y+h; i++) {
+    float inter = map(i, y, y + h, 0, 1);
+    color c = lerpColor(c1, c2, inter);
+    stroke(c);
+    line(x, i, x+w, i);
+  }
+}
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // A SLIDER WITH METER FEEDBACK
 
@@ -45,21 +74,22 @@ class EQSlider extends UIElement {
     noStroke();
 
     // slider rectangle
-    fill(204);
-    rect(x, y, w, h);
+    //fill(204);
+    //rect(x, y, w, h);
 
     // slider meter
-
-    // TODO
+    fill(40);
+    float hmet = value2position(drawn_meter, false) - y;
+    rect(x, y, w, hmet);
 
     // slider thumb
     if (isOver()) {
-      fill(0, 0, 0);
+      fill(150, 150, 150);
     } else {
-      fill(102, 102, 102);
+      fill(200, 200, 200);
     }
-    float ypos = value2position(drawn_v);
-    rect(x, ypos, w, thumbh);
+    float ythumb = value2position(drawn_v, true);
+    rect(x, ythumb, w, thumbh);
   }
 
   float position2value(float pos) {
@@ -69,9 +99,9 @@ class EQSlider extends UIElement {
     return (max_v - min_v) * ratio + min_v;
   }
 
-  float value2position(float val) {
+  float value2position(float val, boolean thumb) {
     float ratio = (val - min_v) / (max_v - min_v);
-    float start = (y + h) - thumbh;
+    float start = (y + h) - (thumb ? thumbh : 0);
     float end = y;
     return ratio * (end - start) + start;
   }
@@ -80,19 +110,4 @@ class EQSlider extends UIElement {
     return min(max(val, minv), maxv);
   }
 
-}
-
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// GRADIENT MAGIC
-
-void makeVerticalGradient(int x, int y, float w, float h, color c1, color c2) {
-  noFill();
-  
-  for (int i = y; i <= y+h; i++) {
-    float inter = map(i, y, y+h, 0, 1);
-    color c = lerpColor(c1, c2, inter);
-    stroke(c);
-    line(x, i, x+w, i);
-  }
 }

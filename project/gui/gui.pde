@@ -8,11 +8,13 @@ int NBANDS = 60;
 OscP5 oscServer;
 NetAddress remote;
 
-UIFlexbox mixer;
+Mixer mixer;
 ControlP5 cp5;
 Textfield ip, port;
 Textlabel gain;
 DraggingEllipse cerchio;
+
+
 void setup() {
   
   Locale.setDefault(new Locale("en", "US")); // for string formatting
@@ -26,7 +28,7 @@ void setup() {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Mixer Board
   
-  mixer = new UIFlexbox(10, 2, Direction.HORIZONTAL);
+  mixer = new Mixer(10, 2);
   mixer.setPosition(0, 40).setSize(width, height/2);
 
   for (int i = 0; i < NBANDS; i++) {
