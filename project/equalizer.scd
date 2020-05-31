@@ -9,15 +9,14 @@ Dialog.openPanel({ arg path;
 });
 )
 
-//PLAY FILE (+ start EQ)
+// SynthDef EQ
 (
 // read a whole sound into memory
 x = Buffer.read(s, p); // remember to free the buffer later.
 FreqScope.new(400, 300, 0, server: s);
 
-SynthDef(\equalizer, { |gains = #[0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01]|
-	arg freqInit = 25;
-	var n = 30, out, outEq, groupLow, groupMid, groupHigh;
+SynthDef(\equalizer, { |gains = #[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], pansx = #[0, 0, 0], pansy = #[0, 0, 0]|
+	var n = 30, freqInit = 25, out, outEq, groupLow, groupMid, groupHigh;
 	//var gain= [0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0.000001];
 	var gainLow= [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 	var gainMid= [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0];
@@ -48,9 +47,9 @@ SynthDef(\equalizer, { |gains = #[0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0
 
 	groupHigh = BLowPass4(outEq, freq: 10000.0, rq: 1.0, mul: 1.0, add: 0.0);
 	*/
-	Out.ar(0, Pan4.ar(groupLow, MouseX.kr(-1,1), MouseY.kr(-1,1), Line.ar(mul: 0.5)));
-	Out.ar(0, Pan4.ar(groupMid, MouseX.kr(-1,1), MouseY.kr(-1,1), Line.ar(mul: 0.5)));
-	Out.ar(0, Pan4.ar(groupHigh, MouseX.kr(-1,1), MouseY.kr(-1,1), Line.ar(mul: 0.5)));
+	Out.ar(0, Pan4.ar(groupLow, pansx[0], pansy[0], Line.ar(mul: 0.5)));
+	Out.ar(0, Pan4.ar(groupMid, pansx[1], pansy[1], Line.ar(mul: 0.5)));
+	Out.ar(0, Pan4.ar(groupHigh, pansx[2], pansy[2], Line.ar(mul: 0.5)));
 
 }).add;
 )
@@ -59,34 +58,47 @@ OSCFunc.trace(true);
 // ora basta
 OSCFunc.trace(false) ;
 
-a = Synth(\equalizer);
-a.seti(\gains, 1, 15);
-
 NetAddr("192.168.1.107", 57120);
 
 
+// O S C
 (
-OSCdef('gainosc',
-	{
-		arg msg;
-		var gain = msg [1];
-
-		postf("i: %, gain: % \n", 15, gain);
-		a.seti(\gains, 15, gain);
-	},
-		"/eq/15/gain");
-)
-
-
-(
+a = Synth(\equalizer);
+//GAIN osc
 for(0, 29, {|i|
-	OSCdef('gainosc',
+	OSCdef(i,
 	{
 		arg msg;
-		var gain = msg [1];
+			var gain = pow(10,(msg [1])/20);
 
 		postf("i: %, gain: % \n", i, gain);
 		a.seti(\gains, i, gain);
 	},
-		"/eq/" +/+ i +/+ "/gain")});
+		"/eq/gain/" +/+ i)});
+
+
+//PANx osc
+for(0, 3, {|j|
+	OSCdef(j,
+	{
+		arg msg;
+		var panx = abs(msg [1]);
+
+		postf("G: %, x: % \n", j, panx);
+		a.seti(\pansx, j, panx);
+	},
+		"/eq/pan/" +/+ j +/+ "/x")});
+
+
+//PANy osc
+for(0, 3, {|k|
+	OSCdef(k,
+	{
+		arg msg;
+		var pany = msg [1];
+
+		postf("G: %, y: % \n", k, pany);
+		a.seti(\pansy, k, pany);
+	},
+		"/eq/pan/" +/+ k +/+ "/y")});
 )
