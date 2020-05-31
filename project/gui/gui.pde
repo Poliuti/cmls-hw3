@@ -30,7 +30,7 @@ void setup() {
   mixer.setPosition(0, 40).setSize(width, height/2);
 
   for (int i = 0; i < NBANDS; i++) {
-    EQSlider s = new EQSlider(-12, 12, 5);
+    EQSlider s = new EQSlider(-12, 12, 3, 5);
     s.onChange = new Callback() {
       public void action(UIElement el) {
         EQSlider sl = (EQSlider) el;
@@ -78,7 +78,6 @@ void setup() {
 void draw() {
   background(20,50,100);
   mixer.draw();
-  background(20,50,100);
   stroke(10);
   fill(205);
   //rectMode(CENTER);
