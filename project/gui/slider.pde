@@ -1,4 +1,4 @@
-class EQSlider implements UIElement {
+class EQSlider extends UIElement {
   float min_v, max_v; // min and max values
   float v, drawn_v; // current value and displayed/drawn value
   float inertia; // speed factor for elasticity
@@ -7,7 +7,6 @@ class EQSlider implements UIElement {
   int thumbh = 10; // height of the thumb of the slider
   
   EQSlider(float miv, float mav, float ine) {
-    //w = 10; h = 10; x = 0; y = 0;
     min_v = miv;
     max_v = mav;
     inertia = ine;
