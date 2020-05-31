@@ -13,11 +13,12 @@ Dialog.openPanel({ arg path;
 (
 // read a whole sound into memory
 x = Buffer.read(s, p); // remember to free the buffer later.
+FreqScope.new(400, 300, 0, server: s);
 
-SynthDef(\equalizer, {
-	arg freqInit = 25, freq;
+SynthDef(\equalizer, { |gains = #[0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01]|
+	arg freqInit = 25;
 	var n = 30, out, outEq, groupLow, groupMid, groupHigh;
-	var gain= [0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0.000001];
+	//var gain= [0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0.000001];
 	var gainLow= [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 	var gainMid= [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0];
 	var gainHigh= [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1];
@@ -25,7 +26,7 @@ SynthDef(\equalizer, {
 	var bwcoeff = pow(r,0.5) - 1/pow(r,0.5);
 	outEq = Mix.fill(n, { |i|
 		//gain[i] * BPF.ar(PlayBuf.ar(2, 0.1), freqInit*pow(r,i), 0.23, mul: 1.0, add: 0.0)
-		BPF.ar(WhiteNoise.ar(1, 0), freqInit*pow(r,i), 0.23, mul: gain[i], add: 0.0)
+		BPF.ar(WhiteNoise.ar(1, 0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0)
 	});
 
 
@@ -58,21 +59,34 @@ OSCFunc.trace(true);
 // ora basta
 OSCFunc.trace(false) ;
 
+a = Synth(\equalizer);
+a.seti(\gains, 1, 15);
+
 NetAddr("192.168.1.107", 57120);
 
-(
-a = Synth(\equalizer);
 
-OSCdef('OSCgain'+/+ 1,
+(
+OSCdef('gainosc',
 	{
 		arg msg;
+		var gain = msg [1];
 
-		var gain = (msg[1]);
-
-		postf("gain: % \n", gain);
-		a.set(\gain, gain);
-
+		postf("i: %, gain: % \n", 15, gain);
+		a.seti(\gains, 15, gain);
 	},
-		"/eq/" +/+ i +/+ "/gain");
+		"/eq/15/gain");
+)
 
-b.release;
+
+(
+for(0, 29, {|i|
+	OSCdef('gainosc',
+	{
+		arg msg;
+		var gain = msg [1];
+
+		postf("i: %, gain: % \n", i, gain);
+		a.seti(\gains, i, gain);
+	},
+		"/eq/" +/+ i +/+ "/gain")});
+)
