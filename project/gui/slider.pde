@@ -59,10 +59,5 @@ class EQSlider extends UIElement {
   float constrain(float val, float minv, float maxv) {
     return min(max(val, minv), maxv);
   }
-
-  boolean isOver() {
-    return mouseX > x && mouseX < (x + w)
-        && mouseY > y && mouseY < (y + h);
-  }
   
 }

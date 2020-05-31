@@ -22,6 +22,11 @@ abstract class UIElement {
     y = yy;
     return this;
   }
+
+  boolean isOver() {
+    return mouseX > x && mouseX < (x + w)
+        && mouseY > y && mouseY < (y + h);
+  }
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
