@@ -117,6 +117,17 @@ void draw() {
   guiroot.draw();
 }
 
+
+// Receive OSC messages to update meters
+void oscEvent(OscMessage msg) {
+  if (msg.addrPattern() == "/gui/volumes") {
+    Float[] meters = (Float[]) msg.arguments();
+    for (int i = 0; i < NBANDS && i < meters.length; i++) {
+      ((EQSlider)mixer.elements.get(i)).setMeter(meters[i]);
+    }
+  }
+}
+
 // for typing on text boxes
 void keyReleased() {
   remote = new NetAddress(ip.getText(), Integer.parseInt(port.getText()));
