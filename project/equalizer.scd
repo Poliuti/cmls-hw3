@@ -28,20 +28,20 @@ SynthDef(\equalizer, {
     var r = pow(2,4/12);
     var bwcoeff = pow(r,0.5) - 1/pow(r,0.5);
 
+	var source = WhiteNoise.ar(1, 0.0);
+
 	outEq = Mix.fill(n, { |i|
-        Pan4.ar(
-			BPF.ar(
-				WhiteNoise.ar(1, 0.0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0
-			),
+		// band-pass to create band
+		var band = BPF.ar(source, freqInit * pow(r,i), bwcoeff, mul: gains[i], add: 0.0);
+		// send peaks to meters
+		SendPeakRMS.kr(band, 5, 3, "/peaks", i);
+		// apply 4-D panning
+        Pan4.ar(band,
 			if(i < 10, pansx[0], if(i<20, pansx[1], pansx[2])),
 			if(i < 10, pansy[0], if(i<20, pansy[1], pansy[2])),
 			Line.ar(mul: 0.5)
 		);
     });
-
-	for(0, 29, { |i|
-		SendPeakRMS.kr(BPF.ar(WhiteNoise.ar(1, 0.0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0), 2, 3, "/peaks", i);
-	});
 
     Out.ar(out, outEq);
 
