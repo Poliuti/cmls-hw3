@@ -37,14 +37,14 @@ class PanSlider extends UIElement {
     noStroke();
     
     // Rectangle
-    fill(205);
+    fill(10,30,80);
     rect(x, y, w, h);
     
     // Circle
     if (isOver()) {
-      fill(80, 80, 80);
+      fill(150);
     } else {
-      fill(102, 102, 102);
+      fill(200);
     }
     float xpos = thumb_x.value2position(thumb_x.drawn_v, getStartX(), getEndX());
     float ypos = thumb_y.value2position(thumb_y.drawn_v, getStartY(), getEndY());

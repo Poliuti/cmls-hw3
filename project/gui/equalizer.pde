@@ -83,9 +83,9 @@ class EQSlider extends UIElement {
 
     // slider thumb
     if (isOver()) {
-      fill(150, 150, 150);
+      fill(150);
     } else {
-      fill(200, 200, 200);
+      fill(200);
     }
     float ythumb = thumb.value2position(thumb.drawn_v, y + h - thumb_h, y);
     rect(x, ythumb, w, thumb_h);

@@ -88,7 +88,7 @@ void setup() {
   guiroot.elements.add(panners);
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  // IP/port and dB value
+  // Other labels and textboxes using ControlP5
   
   PFont font = createFont("arial", 20);
   textFont(font);
@@ -110,8 +110,7 @@ void setup() {
 
   curVal = cp5.addTextlabel("curVal")
     .setText("")
-    .setFont(createFont("arial",25))
-    .setPosition(width - 120, 8);
+    .setFont(createFont("courier bold",25));
     
   cp5.addBang("reset")
     .setPosition(10, height - 40)
@@ -120,6 +119,13 @@ void setup() {
          resetAll();
        }
     });
+  
+  surface.setTitle("");
+  
+  cp5.addTextlabel("title")
+    .setText("spacEq")
+    .setFont(createFont("radio space bold", 32))
+    .setPosition(width/2 - 70, 4);
 
 }
 
