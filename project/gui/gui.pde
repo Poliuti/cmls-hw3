@@ -131,11 +131,14 @@ void draw() {
 
 // Receive OSC messages to update meters
 void oscEvent(OscMessage msg) {
-  if (msg.addrPattern() == "/gui/volumes") {
-    Float[] meters = (Float[]) msg.arguments();
+  if (msg.addrPattern().indexOf("/gui/volumes/") == 0) {
+    String[] path = msg.addrPattern().split("/");
+    int i = Integer.parseInt(path[path.length-1]);
+    ((EQSlider)mixer.elements.get(i)).setMeter((Float)msg.arguments()[0]);
+    /*Float[] meters = (Float[]) msg.arguments();
     for (int i = 0; i < NBANDS && i < meters.length; i++) {
       ((EQSlider)mixer.elements.get(i)).setMeter(meters[i]);
-    }
+    }*/
   }
 }
 
