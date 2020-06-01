@@ -48,6 +48,7 @@ class EQSliderValue extends SliderValue {
   }
   
   void update() {
+    super.update();
     drawn_meter += (meter - drawn_meter) / inertia;
   }
 }

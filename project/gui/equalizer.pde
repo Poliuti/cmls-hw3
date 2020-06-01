@@ -63,7 +63,7 @@ class EQSlider extends UIElement {
     if (isOver() && mousePressed) {
       float start = y + thumb_h / 2;
       float end = (y + h) - thumb_h / 2;
-      thumb.setValue(thumb.position2value(mouseY, start, end));
+      setValue(thumb.position2value(mouseY, start, end));
     }
     thumb.update();
   }
