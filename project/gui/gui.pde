@@ -117,15 +117,30 @@ void draw() {
   guiroot.draw();
 }
 
+// for typing on text boxes
 void keyReleased() {
   remote = new NetAddress(ip.getText(), Integer.parseInt(port.getText()));
   println(remote);
 }
 
+// for resetting sliders
 void mouseClicked(MouseEvent evt) {
+  resetSlider(evt, false);
+}
+
+void resetAll() {
+  resetSlider(null, true);
+}
+
+void resetSlider(MouseEvent evt, boolean all) {
   for (UIElement e : mixer.elements) {
     EQSlider s = (EQSlider) e;
-    if (evt.getCount() == 2 && s.isOver())
+    if (all || evt.getCount() == 2 && s.isOver())
       s.setValue(0);
+  }
+  for (UIElement e : panners.elements) {
+    DraggingEllipse s = (DraggingEllipse) e;
+    if (all || evt.getCount() == 2 && s.isOver())
+      s.setValue(0, 0);
   }
 }
