@@ -78,7 +78,7 @@ class EQSlider extends UIElement {
 
     // slider meter
     fill(40);
-    float hmet = thumb.value2position(thumb.drawn_meter, y + h, y);
+    float hmet = thumb.value2position(thumb.drawn_meter, h, 0);
     rect(x, y, w, hmet);
 
     // slider thumb
