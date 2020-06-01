@@ -1,6 +1,7 @@
 
 s.boot;
 
+~remote = NetAddr("127.0.0.1", 1000);
 // LOAD FILE
 (
 Dialog.openPanel({ arg path;
@@ -25,18 +26,16 @@ SynthDef(\equalizer, { |gains = #[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     });
 
  //(PlayBuf.ar(2, 0.1)
-/*
+
+
     outEnv = Array.fill(n, { |i|
-        SendPeakRMS.kr(BPF.ar(WhiteNoise.ar(1, 0.0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0), 20, 3, "/replyAddress" +/+ i);
+        SendPeakRMS.kr(BPF.ar(WhiteNoise.ar(1, 0.0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0), 20, 3, "/peaks", i);
     });
 
+	postln(outEnv);
+	//~remote.sendMsg("/gui/volumes", outEnv);
+	//postln(~remote.ip);
 
-    for(0, 29, {|i|
-        o = OSCFunc({ |msg|
-            "peak:" +/+ " %, rms" +/+ ": %".format(msg[3], msg[4]).postln
-        }, "/replyAddress" +/+ i)
-        });
-*/
 //o.free;
     Out.ar(out, outEq);
 }).add;
@@ -45,13 +44,21 @@ SynthDef(\equalizer, { |gains = #[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 // O S C
 (
 a = Synth(\equalizer);
+
+~remote = NetAddr("localhost", 12000); // address de PROCESSING
+
+p = OSCFunc({ |msg|
+	~remote.sendMsg("/gui/volumes" +/+ msg[2], msg[4]);
+}, '/peaks');
+
 //GAIN osc
 for(0, 29, {|i|
     OSCdef(i,
     {
-        arg msg;
-            var gain = pow(10,(msg [1])/20);
+        arg msg, addr;
+        var gain = pow(10,(msg [1])/20);
 
+        ~remote = addr;
 
 
         postf("i: %, gain: % \n", i, gain);
@@ -65,9 +72,11 @@ for(0, 29, {|i|
 for(0, 2, {|j|
     OSCdef(j,
     {
-        arg msg;
+        arg msg, addr;
         var panx = msg [1];
 		var pany = msg [2];
+
+		~remote = addr;
 
         postf("G: %, x: %, y: %\n", j, panx, pany);
         a.seti(\pansx, j, panx);
