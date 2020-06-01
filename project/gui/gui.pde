@@ -108,7 +108,7 @@ void setup() {
   gain = cp5.addTextlabel("gainVal")
     .setText("0.0 dB")
     .setFont(createFont("arial",25))
-    .setPosition(width - 120, height - 30);
+    .setPosition(width - 120, 8);
 
 }
 
