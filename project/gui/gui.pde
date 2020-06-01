@@ -90,9 +90,6 @@ void setup() {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Other labels and textboxes using ControlP5
   
-  PFont font = createFont("arial", 20);
-  textFont(font);
-  
   ip = cp5.addTextfield("ip")
     .setCaptionLabel("SuperCollider ip")
     .setValue(remote.address())
@@ -110,7 +107,7 @@ void setup() {
 
   curVal = cp5.addTextlabel("curVal")
     .setText("")
-    .setFont(createFont("courier bold",25));
+    .setFont(createFont("comfortaa bold",25));
     
   cp5.addBang("reset")
     .setPosition(10, height - 40)
