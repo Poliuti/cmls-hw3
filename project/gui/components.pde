@@ -47,48 +47,68 @@ class UIGroup extends UIElement {
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// FLEXBOX
+// STACK
 
 static enum Direction { HORIZONTAL, VERTICAL }
 
-class UIFlexbox extends UIGroup {
-  float margin, spacing; // surrounding margin and space between elements
+class UIStack extends UIGroup {
+  float margin, spacing;
   Direction dir;
   
-  UIFlexbox(float m, float s, Direction d) {
+  UIStack(float m, float s, Direction d) {
     super();
     margin = m;
     spacing = s;
     dir = d;
   }
   
+  float innerW() {
+    return w - 2*margin;
+  }
+  
+  float innerH() {
+    return h - 2*margin;
+  }
+  
   void layout() {
-    int N = elements.size();
-    
-    float innerW = w - 2*margin;
-    float innerH = h - 2*margin;
     float curX = x + margin;
     float curY = y + margin;
-    
+
+    for (UIElement el : elements) {
+      el.setPosition(curX, curY);
+      if (dir == Direction.HORIZONTAL)
+        curX += el.w + spacing;
+      else
+        curY += el.h + spacing;
+    }
+  }
+
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// FLEXBOX
+
+class UIFlexbox extends UIStack {
+
+  UIFlexbox(float m, float s, Direction d) {
+    super(m, s, d);
+  }
+  
+  void layout() {
     float elemH, elemW;
     
     if (dir == Direction.HORIZONTAL) {
-      elemH = innerH;
-      elemW = (innerW + spacing) / N - spacing;
+      elemH = innerH();
+      elemW = (innerW() + spacing) / elements.size() - spacing;
     } else {
-      elemW = innerW;
-      elemH = (innerH + spacing) / N - spacing;
+      elemW = innerW();
+      elemH = (innerH() + spacing) / elements.size() - spacing;
     }
     
-    for (int i = 0; i < N; i++) {
-      elements.get(i)
-        .setSize(elemW, elemH)
-        .setPosition(curX, curY);
-      if (dir == Direction.HORIZONTAL)
-        curX += elemW + spacing;
-      else
-        curY += elemH + spacing;
-    }
+    for (UIElement el : elements)
+      el.setSize(elemW, elemH);
+    
+    super.layout();    
   }
 
 }
