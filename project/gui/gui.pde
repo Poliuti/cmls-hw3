@@ -64,11 +64,11 @@ void setup() {
   panners = new UIStack(10, 30, Direction.HORIZONTAL);
   
   for (int i = 0; i < NPANS; i++) {
-    DraggingEllipse d = new DraggingEllipse(-1, 1, 3, 25);
+    PanSlider d = new PanSlider(-1, 1, 3, 25);
     d.setSize(150, 150);
     d.onChange = new Callback() {
       public void action(UIElement el) {
-        DraggingEllipse de = (DraggingEllipse) el;
+        PanSlider de = (PanSlider) el;
         int j = panners.elements.indexOf(de);
         float[] val = de.getValue();
         OscMessage msg = new OscMessage("/eq/pan/" + j, new Object[]{ val[0], val[1] });
@@ -166,7 +166,7 @@ void resetSlider(MouseEvent evt, boolean all) {
       s.setValue(0);
   }
   for (UIElement e : panners.elements) {
-    DraggingEllipse s = (DraggingEllipse) e;
+    PanSlider s = (PanSlider) e;
     if (all || evt.getCount() == 2 && s.isOver())
       s.setValue(0, 0);
   }

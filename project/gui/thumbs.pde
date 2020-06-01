@@ -41,6 +41,7 @@ class EQSliderValue extends SliderValue {
   
   EQSliderValue(float miv, float mav, float ine) {
     super(miv, mav, ine);
+    meter = min_v;
   }
   
   void setMeter(float new_v) {

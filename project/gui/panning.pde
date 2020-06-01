@@ -1,11 +1,11 @@
-class DraggingEllipse extends UIElement {
+class PanSlider extends UIElement {
   SliderValue thumb_x;
   SliderValue thumb_y;
   Callback onChange;
   
   float thumb_d = 30; // diameter of circle
 
-  DraggingEllipse(float miv, float mav, float ine, float td) {
+  PanSlider(float miv, float mav, float ine, float td) {
     thumb_x = new SliderValue(miv, mav, ine);
     thumb_y = new SliderValue(miv, mav, ine);
     thumb_d = td;
