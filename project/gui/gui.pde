@@ -15,7 +15,7 @@ UIGroup guiroot;
 
 ControlP5 cp5;
 Textfield ip, port;
-Textlabel gain;
+Textlabel curVal;
 
 
 void setup() {
@@ -46,8 +46,10 @@ void setup() {
         float val = sl.getValue();
         OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ val });
         oscServer.send(msg, remote);
-        gain.setText(String.format("%.2f dB", val));
-        println(String.format("gain%d: %.6f", j, val));
+        curVal
+          .setText(String.format("%.2f dB", val))
+          .setPosition(width - 120, 8);
+        //println(String.format("gain%d: %.6f", j, val));
       }
     };
     mixer.elements.add(s);
@@ -71,8 +73,10 @@ void setup() {
         float[] val = de.getValue();
         OscMessage msg = new OscMessage("/eq/pan/" + j, new Object[]{ val[0], val[1] });
         oscServer.send(msg, remote);
-        //pan.setText(String.format("%.2f - %.2f", val[0], val[1]));
-        println(String.format("pan%d: %.6f / %.6f", j, val[0], val[1]));
+        curVal
+          .setText(String.format("%.2f / %.2f", val[0], val[1]))
+          .setPosition(width - 150, 8);
+        //println(String.format("pan%d: %.6f / %.6f", j, val[0], val[1]));
       }
     };
     panners.elements.add(d);
@@ -80,7 +84,6 @@ void setup() {
   
   panners.layout(); // layout first to update stack size
   panners.setPosition(width/2 - panners.w/2, height - panners.h);
-  println("stack height: " + panners.h);
   panners.layout(); // layout again to position children elements
   guiroot.elements.add(panners);
   
@@ -105,10 +108,18 @@ void setup() {
     .setSize(30, 20)
     .setAutoClear(false);
 
-  gain = cp5.addTextlabel("gainVal")
-    .setText("0.0 dB")
+  curVal = cp5.addTextlabel("curVal")
+    .setText("")
     .setFont(createFont("arial",25))
     .setPosition(width - 120, 8);
+    
+  cp5.addBang("reset")
+    .setPosition(10, height - 40)
+    .onClick(new CallbackListener() {
+       public void controlEvent(CallbackEvent evt) {
+         resetAll();
+       }
+    });
 
 }
 
@@ -120,11 +131,14 @@ void draw() {
 
 // Receive OSC messages to update meters
 void oscEvent(OscMessage msg) {
-  if (msg.addrPattern() == "/gui/volumes") {
-    Float[] meters = (Float[]) msg.arguments();
+  if (msg.addrPattern().indexOf("/gui/volumes/") == 0) {
+    String[] path = msg.addrPattern().split("/");
+    int i = Integer.parseInt(path[path.length-1]);
+    ((EQSlider)mixer.elements.get(i)).setMeter((Float)msg.arguments()[0]);
+    /*Float[] meters = (Float[]) msg.arguments();
     for (int i = 0; i < NBANDS && i < meters.length; i++) {
       ((EQSlider)mixer.elements.get(i)).setMeter(meters[i]);
-    }
+    }*/
   }
 }
 
@@ -141,6 +155,7 @@ void mouseClicked(MouseEvent evt) {
 
 void resetAll() {
   resetSlider(null, true);
+  curVal.setText("");
 }
 
 void resetSlider(MouseEvent evt, boolean all) {
