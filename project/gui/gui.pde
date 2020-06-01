@@ -3,7 +3,7 @@ import netP5.*;
 import controlP5.*;
 import java.util.Locale;
 
-int NBANDS = 60;
+int NBANDS = 30;
 
 OscP5 oscServer;
 NetAddress remote;
