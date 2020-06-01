@@ -34,7 +34,7 @@ SynthDef(\equalizer, {
 		// band-pass to create band
 		var band = BPF.ar(source, freqInit * pow(r,i), bwcoeff, mul: gains[i], add: 0.0);
 		// send peaks to meters
-		SendPeakRMS.kr(band, 5, 3, "/peaks", i);
+		SendPeakRMS.kr(band, 10, 3, "/peaks", i);
 		// apply 4-D panning
         Pan4.ar(band,
 			if(i < 10, pansx[0], if(i<20, pansx[1], pansx[2])),
@@ -54,13 +54,14 @@ a = Synth(\equalizer);
 
 ~remote = NetAddr("localhost", 12000);
 
-p = OSCFunc({ |msg|
-	~remote.sendMsg("/gui/volumes" +/+ msg[2], 20*log(10, msg[4]));
+OSCdef('peaks', { |msg|
+	//postf("meter: % volume: % \n", msg[2], 20*log10(msg[4]));
+	~remote.sendMsg("/gui/volumes" +/+ msg[2], 20*log10(msg[4]));
 }, '/peaks');
 
 //GAIN osc
 for(0, 29, {|i|
-	OSCdef('gain' + i,
+	OSCdef("gain" + i,
 	{
         arg msg, addr;
         var gain = pow(10,(msg[1])/20);
@@ -75,7 +76,7 @@ for(0, 29, {|i|
 
 //PANxy osc
 for(0, 2, {|j|
-	OSCdef('pan' + j,
+	OSCdef("pan" + j,
     {
         arg msg, addr;
         var panx = msg[1];
@@ -92,7 +93,10 @@ for(0, 2, {|j|
 
 )
 
+(
+a.stop;
 a.free;
+)
 
 OSCFunc.trace(true);
 // ora basta
