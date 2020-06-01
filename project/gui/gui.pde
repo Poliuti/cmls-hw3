@@ -12,7 +12,7 @@ Mixer mixer;
 ControlP5 cp5;
 Textfield ip, port;
 Textlabel gain;
-DraggingEllipse cerchio;
+DraggingEllipse b;
 
 
 void setup() {
@@ -24,8 +24,6 @@ void setup() {
   
   remote = new NetAddress("localhost", 57120); // initial value, can be overridden
   oscServer = new OscP5(this, 12000);
-
-  cerchio= new DraggingEllipse(400,318);
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Mixer Board
@@ -39,16 +37,22 @@ void setup() {
       public void action(UIElement el) {
         EQSlider sl = (EQSlider) el;
         int j = mixer.elements.indexOf(sl);
-        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.v });
+        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.getValue() });
         oscServer.send(msg, remote);
-        gain.setText(String.format("%.2f dB", sl.v));
-        println(j + ": " + sl.v);
+        gain.setText(String.format("%.2f dB", sl.getValue()));
+        println(j + ": " + sl.getValue());
       }
     };
     mixer.elements.add(s);
   }
   
   mixer.layout();
+  
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Panning Board
+  b = new DraggingEllipse(-1, 1, 3, 30);
+  float bsize = 150;
+  b.setPosition(width / 2 - bsize / 2, height - bsize - 8).setSize(bsize, bsize);
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // IP/port and dB value
@@ -82,12 +86,7 @@ void setup() {
 void draw() {
   background(20,50,100);
   mixer.draw();
-  stroke(10);
-  fill(205);
-  //rectMode(CENTER);
-  rect(325,243,150,150);
-  fill(204, 102, 0);
-  cerchio.draw();
+  b.draw();
 }
 
 void keyReleased() {
