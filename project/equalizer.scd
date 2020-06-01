@@ -61,35 +61,20 @@ for(0, 29, {|i|
 
 
 
-//PANx osc
+//PANxy osc
 for(0, 2, {|j|
     OSCdef(j,
     {
         arg msg;
-        var panx = abs(msg [1]);
+        var panx = msg [1];
+		var pany = msg [2];
 
-        postf("G: %, x: % \n", j, panx);
+        postf("G: %, x: %, y: %\n", j, panx, pany);
         a.seti(\pansx, j, panx);
+		a.seti(\pansy, j, pany);
     },
-        "/eq/pan/" +/+ j +/+ "/x")});
-
-
-
-
-//PANy osc
-for(0, 2, {|k|
-    OSCdef(k,
-    {
-        arg msg;
-        var pany = msg [1];
-
-        postf("G: %, y: % \n", k, pany);
-        a.seti(\pansy, k, pany);
-    },
-        "/eq/pan/" +/+ k +/+ "/y")});
+        "/eq/pan/" +/+ j)});
 )
-
-
 
 
 
