@@ -3,7 +3,7 @@ class DraggingEllipse extends UIElement {
   SliderValue thumb_y;
   Callback onChange;
   
-  float thumb_d = 30; //diameter of circles
+  float thumb_d = 30; // diameter of circle
 
   DraggingEllipse(float miv, float mav, float ine, float td) {
     thumb_x = new SliderValue(miv, mav, ine);
@@ -21,15 +21,11 @@ class DraggingEllipse extends UIElement {
 
   void update() {
     if (isOver() && mousePressed) {
-      // set x slider
-      float start_x = x + thumb_d / 2;
-      float end_x = x + w - thumb_d / 2;
-      thumb_x.setValue(thumb_x.position2value(mouseY, start_x, end_x));
-      // set y slider
-      float start_y = y + h - thumb_d / 2;
-      float end_y = y + thumb_d / 2;
-      thumb_y.setValue(thumb_y.position2value(mouseX, start_y, end_y));
+      setValue(thumb_x.position2value(mouseX, getStartX(), getEndX()),
+               thumb_y.position2value(mouseY, getStartY(), getEndY()));
     }
+    thumb_x.update();
+    thumb_y.update();
   }
 
   void draw() {
@@ -46,9 +42,30 @@ class DraggingEllipse extends UIElement {
     } else {
       fill(102, 102, 102);
     }
-    float xpos = thumb_x.value2position(thumb_x.drawn_v, x, x + w - thumb_d);
-    float ypos = thumb_y.value2position(thumb_y.drawn_v, y + h - thumb_d, y);
+    float xpos = thumb_x.value2position(thumb_x.drawn_v, getStartX(), getEndX());
+    float ypos = thumb_y.value2position(thumb_y.drawn_v, getStartY(), getEndY());
+    ellipseMode(CENTER);
     ellipse(xpos, ypos, thumb_d, thumb_d);
+  }
+  
+  float getStartX() {
+    // left
+    return x + thumb_d / 2;
+  }
+  
+  float getEndX() {
+    // right
+    return x + w - thumb_d / 2;
+  }
+  
+  float getStartY() {
+    // down
+    return y + h - thumb_d / 2;
+  }
+  
+  float getEndY() {
+    // up
+    return y + thumb_d / 2;
   }
  
 }
