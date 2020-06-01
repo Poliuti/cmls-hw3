@@ -72,7 +72,7 @@ for(0, 29, {|i|
 
 
 //PANx osc
-for(0, 3, {|j|
+for(0, 2, {|j|
 	OSCdef(j,
 	{
 		arg msg;
@@ -85,7 +85,7 @@ for(0, 3, {|j|
 
 
 //PANy osc
-for(0, 3, {|k|
+for(0, 2, {|k|
 	OSCdef(k,
 	{
 		arg msg;
