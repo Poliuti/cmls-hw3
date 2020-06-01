@@ -25,8 +25,6 @@ void setup() {
   remote = new NetAddress("localhost", 57120); // initial value, can be overridden
   oscServer = new OscP5(this, 12000);
 
-  b = new DraggingEllipse(-1,1, -1,1);
-
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Mixer Board
   
@@ -49,6 +47,12 @@ void setup() {
   }
   
   mixer.layout();
+  
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Panning Board
+  b = new DraggingEllipse(-1, 1, 3, 30);
+  float bsize = 150;
+  b.setPosition(width / 2 - bsize / 2, height - bsize - 8).setSize(bsize, bsize);
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // IP/port and dB value
