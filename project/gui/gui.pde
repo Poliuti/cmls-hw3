@@ -47,7 +47,7 @@ void setup() {
         OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ val });
         oscServer.send(msg, remote);
         gain.setText(String.format("%.2f dB", val));
-        println(String.format("gain%d: %.6f", j, val));
+        //println(String.format("gain%d: %.6f", j, val));
       }
     };
     mixer.elements.add(s);
@@ -72,7 +72,7 @@ void setup() {
         OscMessage msg = new OscMessage("/eq/pan/" + j, new Object[]{ val[0], val[1] });
         oscServer.send(msg, remote);
         //pan.setText(String.format("%.2f - %.2f", val[0], val[1]));
-        println(String.format("pan%d: %.6f / %.6f", j, val[0], val[1]));
+        //println(String.format("pan%d: %.6f / %.6f", j, val[0], val[1]));
       }
     };
     panners.elements.add(d);
@@ -80,7 +80,6 @@ void setup() {
   
   panners.layout(); // layout first to update stack size
   panners.setPosition(width/2 - panners.w/2, height - panners.h);
-  println("stack height: " + panners.h);
   panners.layout(); // layout again to position children elements
   guiroot.elements.add(panners);
   
