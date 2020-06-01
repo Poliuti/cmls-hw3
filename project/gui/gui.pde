@@ -43,10 +43,11 @@ void setup() {
       public void action(UIElement el) {
         EQSlider sl = (EQSlider) el;
         int j = mixer.elements.indexOf(sl);
-        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.getValue() });
+        float val = sl.getValue();
+        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ val });
         oscServer.send(msg, remote);
-        gain.setText(String.format("%.2f dB", sl.getValue()));
-        println(j + ": " + sl.getValue());
+        gain.setText(String.format("%.2f dB", val));
+        println(String.format("gain%d: %.6f", j, val));
       }
     };
     mixer.elements.add(s);
@@ -63,6 +64,17 @@ void setup() {
   for (int i = 0; i < NPANS; i++) {
     DraggingEllipse d = new DraggingEllipse(-1, 1, 3, 25);
     d.setSize(150, 150);
+    d.onChange = new Callback() {
+      public void action(UIElement el) {
+        DraggingEllipse de = (DraggingEllipse) el;
+        int j = panners.elements.indexOf(de);
+        float[] val = de.getValue();
+        OscMessage msg = new OscMessage("/eq/pan/" + j, new Object[]{ val[0], val[1] });
+        oscServer.send(msg, remote);
+        //pan.setText(String.format("%.2f - %.2f", val[0], val[1]));
+        println(String.format("pan%d: %.6f / %.6f", j, val[0], val[1]));
+      }
+    };
     panners.elements.add(d);
   }
   
