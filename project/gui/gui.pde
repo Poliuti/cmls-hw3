@@ -134,6 +134,7 @@ void oscEvent(OscMessage msg) {
   if (msg.addrPattern().indexOf("/gui/volumes/") == 0) {
     String[] path = msg.addrPattern().split("/");
     int i = Integer.parseInt(path[path.length-1]);
+    println(String.format("meter%d: %.3f", i, msg.arguments()[0]));
     ((EQSlider)mixer.elements.get(i)).setMeter((Float)msg.arguments()[0]);
     /*Float[] meters = (Float[]) msg.arguments();
     for (int i = 0; i < NBANDS && i < meters.length; i++) {
