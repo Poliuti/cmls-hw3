@@ -4,15 +4,18 @@ import controlP5.*;
 import java.util.Locale;
 
 int NBANDS = 30;
+int NPANS  = 3;
 
 OscP5 oscServer;
 NetAddress remote;
 
 Mixer mixer;
+UIStack panners;
+UIGroup guiroot;
+
 ControlP5 cp5;
 Textfield ip, port;
 Textlabel gain;
-DraggingEllipse b;
 
 
 void setup() {
@@ -21,6 +24,9 @@ void setup() {
 
   size(800,400);
   noStroke();
+  
+  cp5 = new ControlP5(this);
+  guiroot = new UIGroup();
   
   remote = new NetAddress("localhost", 57120); // initial value, can be overridden
   oscServer = new OscP5(this, 12000);
@@ -37,10 +43,11 @@ void setup() {
       public void action(UIElement el) {
         EQSlider sl = (EQSlider) el;
         int j = mixer.elements.indexOf(sl);
-        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.getValue() });
+        float val = sl.getValue();
+        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ val });
         oscServer.send(msg, remote);
-        gain.setText(String.format("%.2f dB", sl.getValue()));
-        println(j + ": " + sl.getValue());
+        gain.setText(String.format("%.2f dB", val));
+        println(String.format("gain%d: %.6f", j, val));
       }
     };
     mixer.elements.add(s);
@@ -48,16 +55,38 @@ void setup() {
   
   mixer.layout();
   
+  guiroot.elements.add(mixer);
+  
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Panning Board
-  b = new DraggingEllipse(-1, 1, 3, 30);
-  float bsize = 150;
-  b.setPosition(width / 2 - bsize / 2, height - bsize - 8).setSize(bsize, bsize);
+  panners = new UIStack(10, 30, Direction.HORIZONTAL);
+  
+  for (int i = 0; i < NPANS; i++) {
+    DraggingEllipse d = new DraggingEllipse(-1, 1, 3, 25);
+    d.setSize(150, 150);
+    d.onChange = new Callback() {
+      public void action(UIElement el) {
+        DraggingEllipse de = (DraggingEllipse) el;
+        int j = panners.elements.indexOf(de);
+        float[] val = de.getValue();
+        OscMessage msg = new OscMessage("/eq/pan/" + j, new Object[]{ val[0], val[1] });
+        oscServer.send(msg, remote);
+        //pan.setText(String.format("%.2f - %.2f", val[0], val[1]));
+        println(String.format("pan%d: %.6f / %.6f", j, val[0], val[1]));
+      }
+    };
+    panners.elements.add(d);
+  }
+  
+  panners.layout(); // layout first to update stack size
+  panners.setPosition(width/2 - panners.w/2, height - panners.h);
+  println("stack height: " + panners.h);
+  panners.layout(); // layout again to position children elements
+  guiroot.elements.add(panners);
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // IP/port and dB value
   
-  cp5 = new ControlP5(this);
   PFont font = createFont("arial", 20);
   textFont(font);
   
@@ -79,25 +108,50 @@ void setup() {
   gain = cp5.addTextlabel("gainVal")
     .setText("0.0 dB")
     .setFont(createFont("arial",25))
-    .setPosition(width - 120, height - 30);
+    .setPosition(width - 120, 8);
 
 }
 
 void draw() {
   background(20,50,100);
-  mixer.draw();
-  b.draw();
+  guiroot.draw();
 }
 
+
+// Receive OSC messages to update meters
+void oscEvent(OscMessage msg) {
+  if (msg.addrPattern() == "/gui/volumes") {
+    Float[] meters = (Float[]) msg.arguments();
+    for (int i = 0; i < NBANDS && i < meters.length; i++) {
+      ((EQSlider)mixer.elements.get(i)).setMeter(meters[i]);
+    }
+  }
+}
+
+// for typing on text boxes
 void keyReleased() {
   remote = new NetAddress(ip.getText(), Integer.parseInt(port.getText()));
   println(remote);
 }
 
+// for resetting sliders
 void mouseClicked(MouseEvent evt) {
+  resetSlider(evt, false);
+}
+
+void resetAll() {
+  resetSlider(null, true);
+}
+
+void resetSlider(MouseEvent evt, boolean all) {
   for (UIElement e : mixer.elements) {
     EQSlider s = (EQSlider) e;
-    if (evt.getCount() == 2 && s.isOver())
+    if (all || evt.getCount() == 2 && s.isOver())
       s.setValue(0);
+  }
+  for (UIElement e : panners.elements) {
+    DraggingEllipse s = (DraggingEllipse) e;
+    if (all || evt.getCount() == 2 && s.isOver())
+      s.setValue(0, 0);
   }
 }

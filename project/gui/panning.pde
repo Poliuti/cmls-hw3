@@ -18,6 +18,10 @@ class DraggingEllipse extends UIElement {
     if (onChange != null && (changed_x || changed_y))
       onChange.action(this);
   }
+  
+  float[] getValue() {
+    return new float[] {thumb_x.v, thumb_y.v};
+  }
 
   void update() {
     if (isOver() && mousePressed) {

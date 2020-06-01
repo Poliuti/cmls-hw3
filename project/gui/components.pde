@@ -1,94 +1,124 @@
-// ~~~~~~~~~~~
-// MIXER
-class Mixer extends UIFlexbox {
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// BASE CLASSES
 
-  Mixer(float m, float s) {
-    super(m, 0, Direction.HORIZONTAL);
+interface Callback {
+  void action(UIElement caller);
+}
+
+abstract class UIElement {
+  float w, h; // width and height
+  float x, y; // position
+
+  abstract void draw();
+
+  UIElement setSize(float ww, float hh) {
+    w = ww;
+    h = hh;
+    return this;
+  }
+
+  UIElement setPosition(float xx, float yy) {
+    x = xx;
+    y = yy;
+    return this;
+  }
+
+  boolean isOver() {
+    return mouseX > x && mouseX < (x + w)
+        && mouseY > y && mouseY < (y + h);
+  }
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// GROUP
+
+class UIGroup extends UIElement {
+  ArrayList<UIElement> elements;
+
+  UIGroup() {
+    elements = new ArrayList();
   }
 
   void draw() {
-    makeVerticalGradient(x + margin, y + margin, w - 2*margin - 1, h - 2*margin, color(255, 0, 0), color(0, 200, 0));
-    super.draw();
+    for (UIElement e : elements)
+      e.draw();
   }
-
 }
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// GRADIENT
 
-void makeVerticalGradient(float x, float y, float w, float h, color c1, color c2) {
-  noFill();
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// STACK
 
-  for (float i = y; i <= y+h; i++) {
-    float inter = map(i, y, y + h, 0, 1);
-    color c = lerpColor(c1, c2, inter);
-    stroke(c);
-    line(x, i, x+w, i);
+static enum Direction { HORIZONTAL, VERTICAL }
+
+class UIStack extends UIGroup {
+  float margin, spacing;
+  Direction dir;
+  
+  UIStack(float m, float s, Direction d) {
+    super();
+    margin = m;
+    spacing = s;
+    dir = d;
   }
+  
+  float innerW() {
+    return w - 2*margin;
+  }
+  
+  float innerH() {
+    return h - 2*margin;
+  }
+  
+  void layout() {
+    float curX = x + margin;
+    float curY = y + margin;
+    float maxX = 0, maxY = 0;
+
+    for (UIElement el : elements) {
+      el.setPosition(curX, curY);
+      if (dir == Direction.HORIZONTAL) {
+        curX += el.w + spacing;
+        maxX = curX;
+        maxY = max(maxY, curY + el.h);
+      } else {
+        curY += el.h + spacing;
+        maxX = max(maxX, curX + el.w);
+        maxY = curY;
+      }
+    }
+    
+    // recommpute stack size
+    w = maxX + margin - x;
+    h = maxY + margin - y;
+  }
+
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// A SLIDER WITH METER FEEDBACK
+// FLEXBOX
 
-class EQSlider extends UIElement {
-  EQSliderValue thumb;
-  float thumb_h;
-  Callback onChange;
-  
-  EQSlider(float miv, float mav, float ine, float th) {
-    thumb = new EQSliderValue(miv, mav, ine);
-    thumb_h = th;
-    onChange = null;
-  }
+class UIFlexbox extends UIStack {
 
-  EQSlider(float miv, float mav) {
-    this(miv, mav, 5, 10);
-  }
-
-  void setValue(float vv) {
-    boolean changed = thumb.setValue(vv);
-    if (onChange != null && changed)
-      onChange.action(this);
+  UIFlexbox(float m, float s, Direction d) {
+    super(m, s, d);
   }
   
-  float getValue() {
-    return thumb.v;
-  }
-
-  void setMeter(float mm) {
-    thumb.setMeter(mm);
-  }
-
-  void update() {
-    if (isOver() && mousePressed) {
-      float start = (y + h) - thumb_h / 2; // high value → up
-      float end = y + thumb_h / 2;  // low value → bottom
-      setValue(thumb.position2value(mouseY, start, end));
-    }
-    thumb.update();
-  }
-  
-  void draw() {
-    update();
-    noStroke();
-
-    // slider rectangle
-    //fill(204);
-    //rect(x, y, w, h);
-
-    // slider meter
-    fill(40);
-    float hmet = thumb.value2position(thumb.drawn_meter, h, 0);
-    rect(x, y, w, hmet);
-
-    // slider thumb
-    if (isOver()) {
-      fill(150, 150, 150);
+  void layout() {
+    float elemH, elemW;
+    
+    if (dir == Direction.HORIZONTAL) {
+      elemH = innerH();
+      elemW = (innerW() + spacing) / elements.size() - spacing;
     } else {
-      fill(200, 200, 200);
+      elemW = innerW();
+      elemH = (innerH() + spacing) / elements.size() - spacing;
     }
-    float ythumb = thumb.value2position(thumb.drawn_v, y + h - thumb_h, y);
-    rect(x, ythumb, w, thumb_h);
-  }  
+    
+    for (UIElement el : elements)
+      el.setSize(elemW, elemH);
+    
+    super.layout();    
+  }
 
 }
