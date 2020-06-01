@@ -31,18 +31,13 @@ void makeVerticalGradient(float x, float y, float w, float h, color c1, color c2
 // A SLIDER WITH METER FEEDBACK
 
 class EQSlider extends UIElement {
-  float min_v, max_v;        // min and max values
-  float v, drawn_v;          // current value and displayed/drawn value
-  float inertia;             // intertia of the slider (higher → heavier/slower)
-  float thumbh;              // height of the thumb of the slider
-  float meter, drawn_meter;  // value of meter and displayed/draw value
-  Callback onChange;         // called when slider's value is changed through setValue()
+  EQSliderValue thumb;
+  float thumb_h;
+  Callback onChange;
   
   EQSlider(float miv, float mav, float ine, float th) {
-    min_v = miv;
-    max_v = mav;
-    inertia = ine;
-    thumbh = th;
+    thumb = new EQSliderValue(miv, mav, ine);
+    thumb_h = th;
     onChange = null;
   }
 
@@ -51,22 +46,26 @@ class EQSlider extends UIElement {
   }
 
   void setValue(float vv) {
-    vv = constrain(vv, min_v, max_v);
-    float old_v = v;
-    v = vv;
-    if (onChange != null && v != old_v)
+    boolean changed = thumb.setValue(vv);
+    if (onChange != null && changed)
       onChange.action(this);
+  }
+  
+  float getValue() {
+    return thumb.v;
   }
 
   void setMeter(float mm) {
-    meter = constrain(mm, min_v, max_v);
+    thumb.setMeter(mm);
   }
 
   void update() {
-    if (isOver() && mousePressed)
-       setValue(position2value(mouseY));
-    drawn_v += (v - drawn_v) / inertia;
-    drawn_meter += (meter - drawn_meter) / inertia;
+    if (isOver() && mousePressed) {
+      float start = y + thumb_h / 2;
+      float end = (y + h) - thumb_h / 2;
+      thumb.setValue(thumb.position2value(mouseY, start, end));
+    }
+    thumb.update();
   }
   
   void draw() {
@@ -79,7 +78,7 @@ class EQSlider extends UIElement {
 
     // slider meter
     fill(40);
-    float hmet = value2position(drawn_meter, false) - y;
+    float hmet = thumb.value2position(thumb.drawn_meter, y + h, y);
     rect(x, y, w, hmet);
 
     // slider thumb
@@ -88,26 +87,8 @@ class EQSlider extends UIElement {
     } else {
       fill(200, 200, 200);
     }
-    float ythumb = value2position(drawn_v, true);
-    rect(x, ythumb, w, thumbh);
-  }
-
-  float position2value(float pos) {
-    float start = y + thumbh / 2;
-    float end = (y + h) - thumbh / 2;
-    float ratio = constrain((end - pos) / (end - start), 0, 1);
-    return (max_v - min_v) * ratio + min_v;
-  }
-
-  float value2position(float val, boolean thumb) {
-    float ratio = (val - min_v) / (max_v - min_v);
-    float start = (y + h) - (thumb ? thumbh : 0);
-    float end = y;
-    return ratio * (end - start) + start;
-  }
-
-  float constrain(float val, float minv, float maxv) {
-    return min(max(val, minv), maxv);
-  }
+    float ythumb = thumb.value2position(thumb.drawn_v, y + h - thumb_h, y);
+    rect(x, ythumb, w, thumb_h);
+  }  
 
 }

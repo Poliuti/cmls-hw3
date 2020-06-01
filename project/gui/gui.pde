@@ -39,10 +39,10 @@ void setup() {
       public void action(UIElement el) {
         EQSlider sl = (EQSlider) el;
         int j = mixer.elements.indexOf(sl);
-        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.v });
+        OscMessage msg = new OscMessage("/eq/gain/" + j, new Object[]{ sl.getValue() });
         oscServer.send(msg, remote);
-        gain.setText(String.format("%.2f dB", sl.v));
-        println(j + ": " + sl.v);
+        gain.setText(String.format("%.2f dB", sl.getValue()));
+        println(j + ": " + sl.getValue());
       }
     };
     mixer.elements.add(s);
