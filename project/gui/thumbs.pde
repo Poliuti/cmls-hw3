@@ -21,7 +21,7 @@ class SliderValue {
   }
   
   float position2value(float pos, float start, float end) {
-    float ratio = constrain((end - pos) / (end - start), 0, 1);
+    float ratio = constrain((pos - start) / (end - start), 0, 1);
     return (max_v - min_v) * ratio + min_v;
   }
 
