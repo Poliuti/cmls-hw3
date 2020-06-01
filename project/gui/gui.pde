@@ -4,15 +4,18 @@ import controlP5.*;
 import java.util.Locale;
 
 int NBANDS = 30;
+int NPANS  = 3;
 
 OscP5 oscServer;
 NetAddress remote;
 
 Mixer mixer;
+UIStack panners;
+UIGroup guiroot;
+
 ControlP5 cp5;
 Textfield ip, port;
 Textlabel gain;
-DraggingEllipse b;
 
 
 void setup() {
@@ -21,6 +24,9 @@ void setup() {
 
   size(800,400);
   noStroke();
+  
+  cp5 = new ControlP5(this);
+  guiroot = new UIGroup();
   
   remote = new NetAddress("localhost", 57120); // initial value, can be overridden
   oscServer = new OscP5(this, 12000);
@@ -48,16 +54,27 @@ void setup() {
   
   mixer.layout();
   
+  guiroot.elements.add(mixer);
+  
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Panning Board
-  b = new DraggingEllipse(-1, 1, 3, 30);
-  float bsize = 150;
-  b.setPosition(width / 2 - bsize / 2, height - bsize - 8).setSize(bsize, bsize);
+  panners = new UIStack(10, 30, Direction.HORIZONTAL);
+  
+  for (int i = 0; i < NPANS; i++) {
+    DraggingEllipse d = new DraggingEllipse(-1, 1, 3, 25);
+    d.setSize(150, 150);
+    panners.elements.add(d);
+  }
+  
+  panners.layout(); // layout first to update stack size
+  panners.setPosition(width/2 - panners.w/2, height - panners.h);
+  println("stack height: " + panners.h);
+  panners.layout(); // layout again to position children elements
+  guiroot.elements.add(panners);
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // IP/port and dB value
   
-  cp5 = new ControlP5(this);
   PFont font = createFont("arial", 20);
   textFont(font);
   
@@ -85,8 +102,7 @@ void setup() {
 
 void draw() {
   background(20,50,100);
-  mixer.draw();
-  b.draw();
+  guiroot.draw();
 }
 
 void keyReleased() {
