@@ -73,14 +73,24 @@ class UIStack extends UIGroup {
   void layout() {
     float curX = x + margin;
     float curY = y + margin;
+    float maxX = 0, maxY = 0;
 
     for (UIElement el : elements) {
       el.setPosition(curX, curY);
-      if (dir == Direction.HORIZONTAL)
+      if (dir == Direction.HORIZONTAL) {
         curX += el.w + spacing;
-      else
+        maxX = curX;
+        maxY = max(maxY, curY + el.h);
+      } else {
         curY += el.h + spacing;
+        maxX = max(maxX, curX + el.w);
+        maxY = curY;
+      }
     }
+    
+    // recommpute stack size
+    w = maxX + margin - x;
+    h = maxY + margin - y;
   }
 
 }
