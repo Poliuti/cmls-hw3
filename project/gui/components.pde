@@ -1,94 +1,94 @@
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// BASE CLASSES
+// ~~~~~~~~~~~
+// MIXER
+class Mixer extends UIFlexbox {
 
-interface Callback {
-  void action(UIElement caller);
-}
-
-abstract class UIElement {
-  float w, h; // width and height
-  float x, y; // position
-
-  abstract void draw();
-
-  UIElement setSize(float ww, float hh) {
-    w = ww;
-    h = hh;
-    return this;
-  }
-
-  UIElement setPosition(float xx, float yy) {
-    x = xx;
-    y = yy;
-    return this;
-  }
-
-  boolean isOver() {
-    return mouseX > x && mouseX < (x + w)
-        && mouseY > y && mouseY < (y + h);
-  }
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// GROUP
-
-class UIGroup extends UIElement {
-  ArrayList<UIElement> elements;
-
-  UIGroup() {
-    elements = new ArrayList();
+  Mixer(float m, float s) {
+    super(m, 0, Direction.HORIZONTAL);
   }
 
   void draw() {
-    for (UIElement e : elements)
-      e.draw();
+    makeVerticalGradient(x + margin, y + margin, w - 2*margin - 1, h - 2*margin, color(255, 0, 0), color(0, 200, 0));
+    super.draw();
+  }
+
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// GRADIENT
+
+void makeVerticalGradient(float x, float y, float w, float h, color c1, color c2) {
+  noFill();
+
+  for (float i = y; i <= y+h; i++) {
+    float inter = map(i, y, y + h, 0, 1);
+    color c = lerpColor(c1, c2, inter);
+    stroke(c);
+    line(x, i, x+w, i);
   }
 }
 
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// FLEXBOX
+// A SLIDER WITH METER FEEDBACK
 
-static enum Direction { HORIZONTAL, VERTICAL }
-
-class UIFlexbox extends UIGroup {
-  float margin, spacing; // surrounding margin and space between elements
-  Direction dir;
+class EQSlider extends UIElement {
+  EQSliderValue thumb;
+  float thumb_h;
+  Callback onChange;
   
-  UIFlexbox(float m, float s, Direction d) {
-    super();
-    margin = m;
-    spacing = s;
-    dir = d;
+  EQSlider(float miv, float mav, float ine, float th) {
+    thumb = new EQSliderValue(miv, mav, ine);
+    thumb_h = th;
+    onChange = null;
+  }
+
+  EQSlider(float miv, float mav) {
+    this(miv, mav, 5, 10);
+  }
+
+  void setValue(float vv) {
+    boolean changed = thumb.setValue(vv);
+    if (onChange != null && changed)
+      onChange.action(this);
   }
   
-  void layout() {
-    int N = elements.size();
-    
-    float innerW = w - 2*margin;
-    float innerH = h - 2*margin;
-    float curX = x + margin;
-    float curY = y + margin;
-    
-    float elemH, elemW;
-    
-    if (dir == Direction.HORIZONTAL) {
-      elemH = innerH;
-      elemW = (innerW + spacing) / N - spacing;
+  float getValue() {
+    return thumb.v;
+  }
+
+  void setMeter(float mm) {
+    thumb.setMeter(mm);
+  }
+
+  void update() {
+    if (isOver() && mousePressed) {
+      float start = (y + h) - thumb_h / 2; // high value → up
+      float end = y + thumb_h / 2;  // low value → bottom
+      setValue(thumb.position2value(mouseY, start, end));
+    }
+    thumb.update();
+  }
+  
+  void draw() {
+    update();
+    noStroke();
+
+    // slider rectangle
+    //fill(204);
+    //rect(x, y, w, h);
+
+    // slider meter
+    fill(40);
+    float hmet = thumb.value2position(thumb.drawn_meter, h, 0);
+    rect(x, y, w, hmet);
+
+    // slider thumb
+    if (isOver()) {
+      fill(150, 150, 150);
     } else {
-      elemW = innerW;
-      elemH = (innerH + spacing) / N - spacing;
+      fill(200, 200, 200);
     }
-    
-    for (int i = 0; i < N; i++) {
-      elements.get(i)
-        .setSize(elemW, elemH)
-        .setPosition(curX, curY);
-      if (dir == Direction.HORIZONTAL)
-        curX += elemW + spacing;
-      else
-        curY += elemH + spacing;
-    }
-  }
+    float ythumb = thumb.value2position(thumb.drawn_v, y + h - thumb_h, y);
+    rect(x, ythumb, w, thumb_h);
+  }  
 
 }
