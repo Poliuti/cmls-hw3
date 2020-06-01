@@ -17,7 +17,7 @@ Dialog.openPanel({ arg path;
 //x = Buffer.read(s, p); // remember to free the buffer later.
 FreqScope.new(400, 300, 0, server: s);
 
-SynthDef(\equalizer, { |gains = #[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], pansx = #[0, 0, 0], pansy = #[0, 0, 0]|
+SynthDef(\equalizer, { |gains = #[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], pansx = #[0, 0, 0], pansy = #[0, 0, 0]|
     var n = 30, freqInit = 25, out = 0, outEq, outEnv;
     var r = pow(2,4/12);
     var bwcoeff = pow(r,0.5) - 1/pow(r,0.5);
@@ -27,7 +27,7 @@ SynthDef(\equalizer, { |gains = #[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     });
 
  //(PlayBuf.ar(2, 0.1)
-
+/*
     outEnv = Array.fill(n, { |i|
         SendPeakRMS.kr(BPF.ar(WhiteNoise.ar(1, 0.0), freqInit*pow(r,i), bwcoeff, mul: gains[i], add: 0.0), 20, 3, "/replyAddress" +/+ i);
     });
@@ -38,7 +38,7 @@ SynthDef(\equalizer, { |gains = #[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             "peak:" +/+ " %, rms" +/+ ": %".format(msg[3], msg[4]).postln
         }, "/replyAddress" +/+ i)
         });
-
+*/
 //o.free;
     Out.ar(out, outEq);
 }).add;
@@ -47,6 +47,7 @@ SynthDef(\equalizer, { |gains = #[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 // O S C
 (
 a = Synth(\equalizer);
+
 //GAIN osc
 for(0, 29, {|i|
 	OSCdef(i,
