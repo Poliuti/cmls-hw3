@@ -24,15 +24,15 @@ SynthDef(\equalizer, {
 	pansy = #[0, 0, 0]
 	|
 
-    var n = 30, freqInit = 25, out = 0, outEq, outEnv;
+    var n = 30, freqInit = 25.0, out = 0, outEq, outEnv;
     var r = pow(2,4/12);
-    var bwcoeff = pow(r,0.5) - 1/pow(r,0.5);
+	var bwcoeff = (pow(r,0.5) - 1/pow(r,0.5));
 
 	var source = WhiteNoise.ar(1, 0.0);
 
 	outEq = Mix.fill(n, { |i|
 		// band-pass to create band
-		var band = BPF.ar(source, freqInit * pow(r,i), bwcoeff, mul: gains[i], add: 0.0);
+		var band = BPF.ar(source, round(freqInit * pow(r,i)).min(20000.0), bwcoeff, mul: gains[i], add: 0.0);
 		// send peaks to meters
 		SendPeakRMS.kr(band, 10, 3, "/peaks", i);
 		// apply 4-D panning
