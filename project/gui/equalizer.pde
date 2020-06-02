@@ -34,7 +34,7 @@ class EQSlider extends UIElement {
   
   EQSlider(float miv, float mav, float ine, float th) {
     thumb = new SliderValue(miv, mav, ine);
-    meter = new SliderValue(- (mav - miv), 0, ine); // meter goes up to 0dB
+    meter = new SliderValue(-60, 0, ine); // meter goes up to 0dB
     meter.setValue(meter.min_v); // reset meter to floor
     thumb_h = th;
     onChange = null;
