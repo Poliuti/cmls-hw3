@@ -16,7 +16,6 @@ Dialog.openPanel({
 x = Buffer.read(s, ~p); // remember to free the buffer later.
 FreqScope.new(400, 300, 0, server: s);
 
-
 SynthDef(\equalizer, {
 	|
 	gains = #[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],   /*An array of gains for 30 eq bands*/
@@ -33,11 +32,15 @@ SynthDef(\equalizer, {
 
 	var source = WhiteNoise.ar(1.0, 0.0);         /*define audio source*/
 
+	var bandratios = #[0.018708, 0.023605, 0.022600, 0.029477, 0.032374, 0.043147, 0.037739, 0.052607, 0.062592, 0.061173, 0.068746, 0.079751, 0.109919, 0.110754, 0.126597, 0.154050, 0.212709, 0.199884, 0.207186, 0.262644, 0.276780, 0.313258, 0.364565, 0.395140, 0.420587, 0.551271, 0.552812, 0.587294, 0.694492, 0.786524]; // percentage of the bandwidth of each of the 30 bands, obtained empirically by bandpassing a white noise and detecting the rms values
+	//var bandratios = #[0.010491, 0.005893, 0.013416, 0.008332, 0.013964, 0.017303, 0.014743, 0.015876, 0.016272, 0.025574, 0.025715, 0.030873, 0.030387, 0.034044, 0.038433, 0.048961, 0.051992, 0.056505, 0.067800, 0.070920, 0.077376, 0.086487, 0.100497, 0.107927, 0.126188, 0.136852, 0.147125, 0.169054, 0.183956, 0.209569]; // percentage of the bandwidth of each of the 30 bands, obtained empirically by bandpassing a white noise and detecting the peak values
+
 	outEq = Mix.fill(n, { |i|
 		// band-pass to create bands
 		var band = BPF.ar(source, round(freqInit * pow(r,i)).min(20000.0), bwcoeff, mul: gains[i], add: 0.0);
 		// send peaks to meters
-		SendPeakRMS.kr(band, 10, 3, "/peaks", i);
+		var rescaledBand = (band / bandratios[i]) / n;
+		SendPeakRMS.kr(rescaledBand, 10, 3, "/peaks", i);
 		// apply quadraphonic panning
         Pan4.ar(band,
 			if(i < 10, pansx[0], if(i<20, pansx[1], pansx[2])),
@@ -45,6 +48,8 @@ SynthDef(\equalizer, {
 			Line.ar(mul: 0.5)
 		);
     });
+
+
 
     Out.ar(out, outEq);
 
@@ -59,7 +64,8 @@ a = Synth(\equalizer);
 
 //Send volumes to GUI meters through OSC
 OSCdef('peaks', { |msg|
-	//postf("meter: % volume: % \n", msg[2], 20*log10(msg[4]));
+	// msg[3] is rms, msg[4] is peak, the documentation is wrong
+	postf("meter: % volume: % \n", msg[2], 20*log10(msg[4]));
 	~remote.sendMsg("/gui/volumes" +/+ msg[2], 20*log10(msg[4]));
 }, '/peaks');
 
