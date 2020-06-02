@@ -11,32 +11,31 @@ class Mixer extends UIFlexbox {
     super.draw();
   }
 
-}
+  void makeVerticalGradient(float x, float y, float w, float h, color c1, color c2) {
+    noFill();
 
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// GRADIENT
-
-void makeVerticalGradient(float x, float y, float w, float h, color c1, color c2) {
-  noFill();
-
-  for (float i = y; i <= y+h; i++) {
-    float inter = map(i, y, y + h, 0, 1);
-    color c = lerpColor(c1, c2, inter);
-    stroke(c);
-    line(x, i, x+w, i);
+    for (float i = y; i <= y+h; i++) {
+      float inter = map(i, y, y + h, 0, 1);
+      color c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(x, i, x+w, i);
+    }
   }
+
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// A SLIDER WITH METER FEEDBACK
+// EQ SLIDER WITH METER FEEDBACK
 
 class EQSlider extends UIElement {
-  EQSliderValue thumb;
+  SliderValue thumb, meter;
   float thumb_h;
   Callback onChange;
   
   EQSlider(float miv, float mav, float ine, float th) {
-    thumb = new EQSliderValue(miv, mav, ine);
+    thumb = new SliderValue(miv, mav, ine);
+    meter = new SliderValue(- (mav - miv), 0, ine); // meter goes up to 0dB
+    meter.setValue(meter.min_v); // reset meter to floor
     thumb_h = th;
     onChange = null;
   }
@@ -56,7 +55,7 @@ class EQSlider extends UIElement {
   }
 
   void setMeter(float mm) {
-    thumb.setMeter(mm);
+    meter.setValue(mm);
   }
 
   void update() {
@@ -66,6 +65,7 @@ class EQSlider extends UIElement {
       setValue(thumb.position2value(mouseY, start, end));
     }
     thumb.update();
+    meter.update();
   }
   
   void draw() {
@@ -78,7 +78,7 @@ class EQSlider extends UIElement {
 
     // slider meter
     fill(40);
-    float hmet = thumb.value2position(thumb.drawn_meter, h, 0);
+    float hmet = meter.value2position(meter.drawn_v, h, 0);
     rect(x, y, w, hmet);
 
     // slider thumb

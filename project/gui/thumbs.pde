@@ -35,21 +35,3 @@ class SliderValue {
   }
 
 }
-
-class EQSliderValue extends SliderValue {
-  float meter, drawn_meter;
-  
-  EQSliderValue(float miv, float mav, float ine) {
-    super(miv, mav, ine);
-    meter = min_v;
-  }
-  
-  void setMeter(float new_v) {
-    meter = constrain(new_v + max_v, min_v, max_v); // hack: rescale because meter goes up to 0dB, not + 12dB
-  }
-  
-  void update() {
-    super.update();
-    drawn_meter += (meter - drawn_meter) / inertia;
-  }
-}

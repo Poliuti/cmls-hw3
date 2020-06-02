@@ -20,7 +20,7 @@ Textlabel curVal;
 
 void setup() {
   
-  Locale.setDefault(new Locale("en", "US")); // for string formatting
+  Locale.setDefault(new Locale("en", "US")); // for string formatting (dot for decimal separator)
 
   size(800,400);
   noStroke();
@@ -28,8 +28,8 @@ void setup() {
   cp5 = new ControlP5(this);
   guiroot = new UIGroup();
   
-  remote = new NetAddress("localhost", 57120); // initial value, can be overridden
-  oscServer = new OscP5(this, 12000);
+  remote = new NetAddress("localhost", 57120); // initial value, can be overridden in the gui
+  oscServer = new OscP5(this, 12000);  // Processing OSC server
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Mixer Board
@@ -84,7 +84,7 @@ void setup() {
   
   panners.layout(); // layout first to update stack size
   panners.setPosition(width/2 - panners.w/2, height - panners.h);
-  panners.layout(); // layout again to position children elements
+  panners.layout(); // layout again to re-position children elements
   guiroot.elements.add(panners);
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -135,14 +135,11 @@ void draw() {
 // Receive OSC messages to update meters
 void oscEvent(OscMessage msg) {
   if (msg.addrPattern().indexOf("/gui/volumes/") == 0) {
-    String[] path = msg.addrPattern().split("/");
-    int i = Integer.parseInt(path[path.length-1]);
-    println(String.format("meter%d: %.3f", i, msg.arguments()[0]));
-    ((EQSlider)mixer.elements.get(i)).setMeter((Float)msg.arguments()[0]);
-    /*Float[] meters = (Float[]) msg.arguments();
-    for (int i = 0; i < NBANDS && i < meters.length; i++) {
-      ((EQSlider)mixer.elements.get(i)).setMeter(meters[i]);
-    }*/
+    String[] path = msg.addrPattern().split("/");  // gui, volumes, i
+    int i = Integer.parseInt(path[path.length-1]); // ←------------ ↑
+    Float val = (Float) msg.arguments()[0];
+    //println(String.format("meter%d: %.3f", i, val));
+    ((EQSlider)mixer.elements.get(i)).setMeter(val);
   }
 }
 
