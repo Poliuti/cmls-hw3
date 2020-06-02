@@ -31,7 +31,7 @@ SynthDef(\equalizer, {
 	var r = pow(2,4/12);                          /*R coefficient*/
 	var bwcoeff = (pow(r,0.5) - 1/pow(r,0.5));    /*bandwidth coefficient*/
 
-	var source = WhiteNoise.ar(1.0, 0.0);           /*define audio source*/
+	var source = WhiteNoise.ar(1.0, 0.0);         /*define audio source*/
 
 	outEq = Mix.fill(n, { |i|
 		// band-pass to create bands
