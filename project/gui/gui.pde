@@ -48,7 +48,7 @@ void setup() {
         oscServer.send(msg, remote);
         curVal
           .setText(String.format("%.2f dB", val))
-          .setPosition(width - 120, 8);
+          .setPosition(width - 115, 14);
         //println(String.format("gain%d: %.6f", j, val));
       }
     };
@@ -75,7 +75,7 @@ void setup() {
         oscServer.send(msg, remote);
         curVal
           .setText(String.format("%.2f / %.2f", val[0], val[1]))
-          .setPosition(width - 150, 8);
+          .setPosition(width - 160, 14);
         //println(String.format("pan%d: %.6f / %.6f", j, val[0], val[1]));
       }
     };
@@ -107,7 +107,7 @@ void setup() {
 
   curVal = cp5.addTextlabel("curVal")
     .setText("")
-    .setFont(createFont("comfortaa bold",25));
+    .setFont(loadFont("ComfortaaBold-25.vlw"));
     
   cp5.addBang("reset")
     .setPosition(10, height - 40)
@@ -121,8 +121,8 @@ void setup() {
   
   cp5.addTextlabel("title")
     .setText("spacEq")
-    .setFont(createFont("radio space bold", 32))
-    .setPosition(width/2 - 70, 4);
+    .setFont(loadFont("RadioSpaceBold-32.vlw"))
+    .setPosition(width/2 - 70, 10);
 
 }
 
