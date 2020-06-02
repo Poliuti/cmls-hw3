@@ -1,6 +1,6 @@
 s.boot;
 
-// LOAD a .wav MONO file (for testing, bypass this step and use WhiteNoise.ar(1.0, 0.0)  as source at line 34
+// LOAD a .wav MONO file (for testing, bypass this step and use WhiteNoise.ar(1.0, 0.0)  as source at line 34)
 (
 Dialog.openPanel({
 	arg path;
@@ -13,8 +13,8 @@ Dialog.openPanel({
 // Synth definition for the equalizer
 (
 // read a whole sound into memory
-x = Buffer.read(s, ~p); // remember to free the buffer later.
-FreqScope.new(400, 300, 0, server: s);
+b = Buffer.read(s, ~p); // remember to free the buffer later.
+//FreqScope.new(400, 300, 0, server: s);
 
 
 SynthDef(\equalizer, {
@@ -31,7 +31,7 @@ SynthDef(\equalizer, {
 	var r = pow(2,4/12);                          /*R coefficient*/
 	var bwcoeff = (pow(r,0.5) - 1/pow(r,0.5));    /*bandwidth coefficient*/
 
-	var source = PlayBuf.ar(1, 0);                /*define audio source*/
+	var source = PlayBuf.ar(1, b);                /*define audio source*/
 
 	outEq = Mix.fill(n, { |i|
 		// band-pass to create bands
@@ -41,8 +41,7 @@ SynthDef(\equalizer, {
 		// apply quadraphonic panning
         Pan4.ar(band,
 			if(i < 10, pansx[0], if(i<20, pansx[1], pansx[2])),
-			if(i < 10, pansy[0], if(i<20, pansy[1], pansy[2])),
-			Line.ar(mul: 0.5)
+			if(i < 10, pansy[0], if(i<20, pansy[1], pansy[2]))
 		);
     });
 
@@ -59,6 +58,7 @@ a = Synth(\equalizer);
 
 //Send volumes to GUI meters through OSC
 OSCdef('peaks', { |msg|
+	// msg[3] is rms, msg[4] is peak, the documentation is wrong
 	//postf("meter: % volume: % \n", msg[2], 20*log10(msg[4]));
 	~remote.sendMsg("/gui/volumes" +/+ msg[2], 20*log10(msg[4]));
 }, '/peaks');
@@ -101,5 +101,6 @@ for(0, 2, {|j|
 (
 a.stop;
 a.free;
+b.stop;
+b.free;
 )
-
