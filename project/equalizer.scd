@@ -1,6 +1,6 @@
 s.boot;
 
-// LOAD FILE
+// LOAD a .wav MONO file (for testing, bypass this step and use WhiteNoise.ar(1.0, 0.0)  as source at line 34
 (
 Dialog.openPanel({
 	arg path;
@@ -31,7 +31,7 @@ SynthDef(\equalizer, {
 	var r = pow(2,4/12);                          /*R coefficient*/
 	var bwcoeff = (pow(r,0.5) - 1/pow(r,0.5));    /*bandwidth coefficient*/
 
-	var source = WhiteNoise.ar(1.0, 0.0);         /*define audio source*/
+	var source = PlayBuf.ar(1, 0);                /*define audio source*/
 
 	outEq = Mix.fill(n, { |i|
 		// band-pass to create bands
@@ -102,3 +102,4 @@ for(0, 2, {|j|
 a.stop;
 a.free;
 )
+
